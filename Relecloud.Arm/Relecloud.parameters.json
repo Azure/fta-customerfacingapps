@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    // General
+    "resourcePrefix": { "value": "relecloud" },
+
+    // Web App
+    "webPlanSkuName": { "value": "S1" },
+    "webPlanInstanceCount": { "value": 1 },
+
+    // SQL Database
+    "sqlDatabaseAdministratorLogin": { "value": "relecloud-admin" },
+    "sqlDatabaseAdministratorPassword": { "value": "NFoDplCoOd8w" },
+    "sqlDatabaseEdition": { "value": "Basic" },
+    "sqlDatabaseRequestedServiceObjectiveName": { "value": "Basic" },
+
+    // Redis Cache
+    "redisCacheSkuName": { "value": "Basic" },
+    "redisCacheSkuCapacity": { "value": 0 },
+
+    // Storage Account
+    "storageAccountType": { "value": "Standard_LRS" },
+
+    // Search Service
+    "searchServiceSkuName": { "value": "basic" },
+    "searchServiceReplicaCount": { "value": 1 },
+    "searchServicePartitionCount": { "value": 1 },
+
+    // Traffic Manager
+    "trafficManagerRoutingMethod": { "value": "Performance" },
+
+    // Cognitive Services
+    "cognitiveServicesSkuName": { "value": "S1" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "scriptFile": "..\\Relecloud.FunctionApp.dll",
+  "entryPoint": "Relecloud.FunctionApp.EventProcessor.EventProcessorFunction.Run",
+  "bindings": [
+    {
+      "name": "eventMessage",
+      "queueName": "events",
+      "connection": "App:ServiceBus:ConnectionString",
+      "accessRights": "manage",
+      "type": "serviceBusTrigger",
+      "direction": "in"
+    }
+  ]
+}

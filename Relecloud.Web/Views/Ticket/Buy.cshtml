@@ -1,0 +1,14 @@
+﻿@model Relecloud.Web.Models.Concert
+@{
+    ViewData["Title"] = "Confirm Purchase";
+}
+<h1>@ViewData["Title"]</h1>
+<form asp-controller="Ticket" asp-action="Buy" method="post">
+    <div class="alert alert-info">
+        Are you sure you want to buy a ticket for @Model.Artist on @Model.StartTime.UtcDateTime.ToString()?
+    </div>
+    <div>
+        <input type="hidden" name="concertId" value="@Model.Id" />
+        <input type="submit" class="btn btn-success btn-lg" value="Buy Now" />
+    </div>
+</form>
