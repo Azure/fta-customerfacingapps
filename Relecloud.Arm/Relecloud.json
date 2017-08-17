@@ -157,7 +157,7 @@
     "redisCacheName": "[concat(parameters('resourcePrefix'), '-redis')]",
     "redisCacheSkuFamily": "C",
     "redisCacheRedisVersion": "2.8",
-    "storageAccountName": "[concat(parameters('resourcePrefix'), 'storage')]",
+    "storageAccountName": "[concat(toLower(parameters('resourcePrefix')), 'storage')]",
     "cosmosDbName": "[concat(parameters('resourcePrefix'), '-cosmosdb')]",
     "cosmosDbDefaultExperience": "DocumentDB",
     "cosmosDbDatabaseId": "[parameters('resourcePrefix')]",
@@ -288,7 +288,7 @@
             "App:CosmosDB:CollectionId": "[variables('cosmosDbCollectionId')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
             "App:AzureSearch:ServiceName": "[variables('searchServiceName')]",
-            "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName')), '2015-02-28').primaryKey]",
+            "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName'))).primaryKey]",
             "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
             "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]"
           }
@@ -617,7 +617,7 @@
             "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1)]",
             "WEBSITE_CONTENTSHARE": "[concat(toLower(variables('functionAppName')), 'bbed')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
-            "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]",
+            "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "App:CosmosDB:DatabaseUri": "[concat('https://', variables('cosmosDbName'), '.documents.azure.com:443/')]",
             "App:CosmosDB:DatabaseKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), providers('Microsoft.DocumentDB','databaseAccounts').apiVersions[0]).primaryMasterKey]",
             "App:CosmosDB:DatabaseId": "[variables('cosmosDbDatabaseId')]",
@@ -634,7 +634,7 @@
     },
     {
       "apiVersion": "2017-03-01",
-      "type": "Microsoft.Network/trafficmanagerprofiles",
+      "type": "Microsoft.Network/trafficManagerProfiles",
       "name": "[variables('trafficManagerName')]",
       "location": "global",
       "properties": {
@@ -642,11 +642,11 @@
         "trafficRoutingMethod": "[parameters('trafficManagerRoutingMethod')]",
         "dnsConfig": {
           "relativeName": "[variables('trafficManagerDnsName')]",
-          "ttl": "300"
+          "ttl": 300
         },
         "monitorConfig": {
-          "protocol": "http",
-          "port": "80",
+          "protocol": "HTTP",
+          "port": 80,
           "path": "/"
         }
       },
