@@ -14,18 +14,12 @@ namespace Relecloud.Web
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddUserSecrets<Startup>()
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -42,7 +36,7 @@ namespace Relecloud.Web
                 // If not, ASP.NET Core automatically injects an in-memory cache.
                 services.AddDistributedRedisCache(options => { options.Configuration = redisCacheConnection; });
             }
-            services.AddDbContext<ConcertDataContext>(options => options.UseSqlServer(Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
+            services.AddDbContextPool<ConcertDataContext>(options => options.UseSqlServer(Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
             services.AddScoped<IConcertRepository, SqlDatabaseConcertRepository>();
             services.AddSingleton<ITicketRepository>(x => new CosmosDBTicketRepository(Configuration.GetValue<string>("App:CosmosDB:DatabaseUri"), Configuration.GetValue<string>("App:CosmosDB:DatabaseKey"), Configuration.GetValue<string>("App:CosmosDB:DatabaseId"), Configuration.GetValue<string>("App:CosmosDB:CollectionId")));
             services.AddScoped<IConcertSearchService>(x => new AzureSearchConcertSearchService(Configuration.GetValue<string>("App:AzureSearch:ServiceName"), Configuration.GetValue<string>("App:AzureSearch:AdminKey"), Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
@@ -50,15 +44,12 @@ namespace Relecloud.Web
 
             // The ApplicationInitializer is injected in the Configure method with all its dependencies and will ensure
             // they are all properly initialized upon construction.
-            services.AddSingleton<ApplicationInitializer, ApplicationInitializer>();
+            services.AddScoped<ApplicationInitializer, ApplicationInitializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationInitializer applicationInitializer)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationInitializer applicationInitializer)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-
             app.UseDeveloperExceptionPage();
             if (env.IsDevelopment())
             {
