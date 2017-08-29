@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.WebJobs.Host;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Host;
+using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
 using System;
 using System.Configuration;
@@ -11,12 +13,11 @@ namespace Relecloud.FunctionApp.EventProcessor
 {
     public static class EventProcessorFunction
     {
-        public static async Task Run(byte[] eventMessage, TraceWriter log)
+        [FunctionName("EventProcessor")]
+        public static async Task Run([ServiceBusTrigger("events", AccessRights.Manage, Connection = "App:ServiceBus:ConnectionString")]string eventMessage, TraceWriter log)
         {
-            // The message body sent by the .NET Core Service Bus client is encoded and
-            // cannot automatically be bound to a string or JSON object in a Function.
-            var eventInfo = JsonConvert.DeserializeObject<Event>(Encoding.UTF8.GetString(eventMessage));
-            log.Info($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\")");
+            var eventInfo = JsonConvert.DeserializeObject<Event>(eventMessage);
+            log.Info($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\"");
 
             if (string.Equals(eventInfo.EventType, "ReviewCreated", StringComparison.OrdinalIgnoreCase))
             {
