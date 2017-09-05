@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
 using Relecloud.Web.Services;
 using System;
@@ -8,8 +10,6 @@ namespace Relecloud.Web.Controllers
 {
     public class ConcertController : Controller
     {
-        private const string userId = "1";
-
         #region Fields
 
         private readonly IConcertRepository concertRepository;
@@ -65,13 +65,14 @@ namespace Relecloud.Web.Controllers
 
         #region Review
 
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Review(Review review)
         {
             if (ModelState.IsValid)
             {
-                review.UserId = userId;
+                review.UserId = this.User.GetUniqueId();
                 review.CreatedTime = DateTimeOffset.UtcNow;
                 await this.concertRepository.AddReviewAsync(review);
                 await this.eventSenderService.SendEventAsync(Event.ReviewCreated(review.Id));

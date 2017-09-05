@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
 using Relecloud.Web.Services;
 using System.Threading.Tasks;
 
 namespace Relecloud.Web.Controllers
 {
+    [Authorize]
     public class TicketController : Controller
     {
-        private const string userId = "1";
-
         #region Fields
 
         private readonly IConcertRepository concertRepository;
@@ -30,6 +31,7 @@ namespace Relecloud.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+            var userId = this.User.GetUniqueId();
             var model = await this.ticketRepository.GetAllAsync(userId);
             return View(model);
         }
@@ -63,7 +65,7 @@ namespace Relecloud.Web.Controllers
                 var ticket = new Ticket
                 {
                     ConcertId = concertId,
-                    UserId = userId,
+                    UserId = this.User.GetUniqueId(),
                     Description = $"{concert.Artist} on {concert.StartTime.UtcDateTime.ToString()}",
                     Price = concert.Price
                 };
