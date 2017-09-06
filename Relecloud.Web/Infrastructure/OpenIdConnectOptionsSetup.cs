@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Relecloud.Web.Infrastructure
@@ -83,7 +84,7 @@ namespace Relecloud.Web.Infrastructure
             }
             else
             {
-                context.Response.Redirect("/home/error?message=" + context.Failure.Message);
+                context.Response.Redirect("/home/error?message=" + WebUtility.UrlEncode(context.Failure.Message));
             }
             return Task.CompletedTask;
         }

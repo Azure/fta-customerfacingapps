@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Relecloud.Web", "Relecloud.Web\Relecloud.Web.csproj", "{FECB9225-5A9F-4B0B-A292-597E4D829D5C}"
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Relecloud.Arm", "Relecloud.Arm\Relecloud.Arm.deployproj", "{696DE439-4755-4F02-BEF9-16579F3C28E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Relecloud.FunctionApp", "Relecloud.FunctionApp\Relecloud.FunctionApp.csproj", "{056AEAA3-1CAD-4534-B6E5-D3DA7201E3B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Relecloud.FunctionApp", "Relecloud.FunctionApp\Relecloud.FunctionApp.csproj", "{056AEAA3-1CAD-4534-B6E5-D3DA7201E3B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6926569D-F16B-462A-AEB4-5BAB0A0C28D2}
 	EndGlobalSection
 EndGlobal
