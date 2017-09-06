@@ -145,6 +145,21 @@
         "S4"
       ],
       "defaultValue": "S1"
+    },
+    "aadb2cClientId": {
+      "type": "string"
+    },
+    "aadb2cTenant": {
+      "type": "string"
+    },
+    "aadb2cSignUpSignInPolicyId": {
+      "type": "string"
+    },
+    "aadb2cResetPasswordPolicyId": {
+      "type": "string"
+    },
+    "aadb2cEditProfilePolicyId": {
+      "type": "string"
     }
   },
   "variables": {
@@ -290,7 +305,12 @@
             "App:AzureSearch:ServiceName": "[variables('searchServiceName')]",
             "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName'))).primaryKey]",
             "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
-            "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]"
+            "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]",
+            "App:Authentication:ClientId": "[parameters('aadb2cClientId')]",
+            "App:Authentication:Tenant": "[parameters('aadb2cTenant')]",
+            "App:Authentication:SignUpSignInPolicyId": "[parameters('aadb2cSignUpSignInPolicyId')]",
+            "App:Authentication:ResetPasswordPolicyId": "[parameters('aadb2cResetPasswordPolicyId')]",
+            "App:Authentication:EditProfilePolicyId": "[parameters('aadb2cEditProfilePolicyId')]"
           }
         }
       ]
