@@ -281,7 +281,10 @@
       "properties": {
         "name": "[variables('webSiteName')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('webPlanName'))]",
-        "clientAffinityEnabled": false
+        "clientAffinityEnabled": false,
+        "siteConfig": {
+          "AlwaysOn": true
+        }
       },
       "resources": [
         {
@@ -303,7 +306,7 @@
             "App:CosmosDB:CollectionId": "[variables('cosmosDbCollectionId')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
             "App:AzureSearch:ServiceName": "[variables('searchServiceName')]",
-            "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName'))).primaryKey]",
+            "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName')), '2015-02-28').primaryKey]",
             "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
             "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]",
             "App:Authentication:ClientId": "[parameters('aadb2cClientId')]",
