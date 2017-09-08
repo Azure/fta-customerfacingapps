@@ -173,10 +173,6 @@
     "redisCacheSkuFamily": "C",
     "redisCacheRedisVersion": "2.8",
     "storageAccountName": "[concat(toLower(parameters('resourcePrefix')), 'storage')]",
-    "cosmosDbName": "[concat(parameters('resourcePrefix'), '-cosmosdb')]",
-    "cosmosDbDefaultExperience": "DocumentDB",
-    "cosmosDbDatabaseId": "[parameters('resourcePrefix')]",
-    "cosmosDbCollectionId": "Tickets",
     "searchServiceName": "[concat(parameters('resourcePrefix'), '-search')]",
     "searchServiceHostingMode": "Default",
     "functionAppName": "[concat(parameters('resourcePrefix'), '-functions')]",
@@ -300,10 +296,6 @@
           "properties": {
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:RedisCache:ConnectionString": "[concat(reference(resourceId('Microsoft.Cache/redis', variables('redisCacheName'))).hostName, ':', reference(resourceId('Microsoft.Cache/redis', variables('redisCacheName'))).sslPort, ',password=', listkeys(resourceId('Microsoft.Cache/redis', variables('redisCacheName')), providers('Microsoft.Cache', 'redis').apiVersions[0]).primaryKey, ',ssl=True,abortConnect=False,syncTimeout=2000,allowAdmin=true')]",
-            "App:CosmosDB:DatabaseUri": "[concat('https://', variables('cosmosDbName'), '.documents.azure.com:443/')]",
-            "App:CosmosDB:DatabaseKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), providers('Microsoft.DocumentDB','databaseAccounts').apiVersions[0]).primaryMasterKey]",
-            "App:CosmosDB:DatabaseId": "[variables('cosmosDbDatabaseId')]",
-            "App:CosmosDB:CollectionId": "[variables('cosmosDbCollectionId')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
             "App:AzureSearch:ServiceName": "[variables('searchServiceName')]",
             "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName')), '2015-02-28').primaryKey]",
@@ -568,27 +560,6 @@
       "kind": "Storage"
     },
     {
-      "apiVersion": "2015-04-08",
-      "kind": "GlobalDocumentDB",
-      "type": "Microsoft.DocumentDb/databaseAccounts",
-      "name": "[variables('cosmosDbName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "databaseAccountOfferType": "Standard",
-        "locations": [
-          {
-            "id": "[concat(variables('cosmosDbName'), '-', resourceGroup().location)]",
-            "failoverPriority": 0,
-            "locationName": "[resourceGroup().location]"
-          }
-        ]
-      },
-      "tags": {
-        "defaultExperience": "[variables('cosmosDbDefaultExperience')]",
-        "displayName": "CosmosDB"
-      }
-    },
-    {
       "apiVersion": "2015-08-19",
       "name": "[variables('searchServiceName')]",
       "location": "[resourceGroup().location]",
@@ -641,10 +612,6 @@
             "WEBSITE_CONTENTSHARE": "[concat(toLower(variables('functionAppName')), 'bbed')]",
             "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
-            "App:CosmosDB:DatabaseUri": "[concat('https://', variables('cosmosDbName'), '.documents.azure.com:443/')]",
-            "App:CosmosDB:DatabaseKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosDbName')), providers('Microsoft.DocumentDB','databaseAccounts').apiVersions[0]).primaryMasterKey]",
-            "App:CosmosDB:DatabaseId": "[variables('cosmosDbDatabaseId')]",
-            "App:CosmosDB:CollectionId": "[variables('cosmosDbCollectionId')]",
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
             "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]",

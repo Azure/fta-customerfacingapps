@@ -25,7 +25,7 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             this.database.Initialize();
         }
 
-        public async Task<Concert> GetByIdAsync(int id)
+        public async Task<Concert> GetConcertByIdAsync(int id)
         {
             return await this.database.Concerts.Where(c => c.Id == id).Include(c => c.Reviews).SingleOrDefaultAsync();
         }
@@ -52,6 +52,29 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
         public async Task AddReviewAsync(Review review)
         {
             this.database.Reviews.Add(review);
+            await this.database.SaveChangesAsync();
+        }
+
+        public async Task CreateTicketAsync(Ticket ticket)
+        {
+            this.database.Tickets.Add(ticket);
+            await this.database.SaveChangesAsync();
+        }
+
+        public async Task<IList<Ticket>> GetAllTicketsAsync(string userId)
+        {
+            return await this.database.Tickets.Where(t => t.UserId == userId).ToListAsync();
+        }
+
+        public async Task CreateOrUpdateUserAsync(User user)
+        {
+            var dbUser = await this.database.Users.FindAsync(user.Id);
+            if (dbUser == null)
+            {
+                dbUser = new User { Id = user.Id };
+                this.database.Users.Add(dbUser);
+            }
+            dbUser.DisplayName = user.DisplayName;
             await this.database.SaveChangesAsync();
         }
 

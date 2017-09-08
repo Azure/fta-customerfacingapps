@@ -13,16 +13,14 @@ namespace Relecloud.Web.Controllers
         #region Fields
 
         private readonly IConcertRepository concertRepository;
-        private readonly ITicketRepository ticketRepository;
 
         #endregion
 
         #region Constructors
 
-        public TicketController(IConcertRepository concertRepository, ITicketRepository ticketRepository)
+        public TicketController(IConcertRepository concertRepository)
         {
             this.concertRepository = concertRepository;
-            this.ticketRepository = ticketRepository;
         }
 
         #endregion
@@ -32,7 +30,7 @@ namespace Relecloud.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = this.User.GetUniqueId();
-            var model = await this.ticketRepository.GetAllAsync(userId);
+            var model = await this.concertRepository.GetAllTicketsAsync(userId);
             return View(model);
         }
 
@@ -42,7 +40,7 @@ namespace Relecloud.Web.Controllers
 
         public async Task<IActionResult> Buy(int concertId)
         {
-            var model = await this.concertRepository.GetByIdAsync(concertId);
+            var model = await this.concertRepository.GetConcertByIdAsync(concertId);
             if (model == null)
             {
                 return NotFound();
@@ -57,7 +55,7 @@ namespace Relecloud.Web.Controllers
         {
             if (ModelState.IsValid)
             {
-                var concert = await this.concertRepository.GetByIdAsync(concertId);
+                var concert = await this.concertRepository.GetConcertByIdAsync(concertId);
                 if (concert == null)
                 {
                     return BadRequest();
@@ -69,7 +67,7 @@ namespace Relecloud.Web.Controllers
                     Description = $"{concert.Artist} on {concert.StartTime.UtcDateTime.ToString()}",
                     Price = concert.Price
                 };
-                await this.ticketRepository.CreateAsync(ticket);
+                await this.concertRepository.CreateTicketAsync(ticket);
             }
             return RedirectToAction(nameof(Index));
         }

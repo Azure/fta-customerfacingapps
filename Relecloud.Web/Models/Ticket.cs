@@ -1,24 +1,15 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-
-namespace Relecloud.Web.Models
+﻿namespace Relecloud.Web.Models
 {
     public class Ticket
     {
-        [Key]
-        [JsonProperty("id")]
-        public string Id { get; set; }
-
-        [JsonProperty("concertId")]
-        public int ConcertId { get; set; }
-
-        [JsonProperty("userId")]
-        public string UserId { get; set; }
-
-        [JsonProperty("description")]
+        public int Id { get; set; }
         public string Description { get; set; }
-
-        [JsonProperty("price")]
         public double Price { get; set; }
+
+        public int ConcertId { get; set; }
+        public Concert Concert { get; set; }
+
+        public string UserId { get; set; }
+        public User User { get; set; }
     }
 }

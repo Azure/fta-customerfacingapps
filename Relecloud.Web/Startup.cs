@@ -10,7 +10,6 @@ using Microsoft.Extensions.Options;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Services;
 using Relecloud.Web.Services.AzureSearchService;
-using Relecloud.Web.Services.CosmosDBConsultRequestRepository;
 using Relecloud.Web.Services.EventBusEventSenderService;
 using Relecloud.Web.Services.SqlDatabaseEventRepository;
 
@@ -42,7 +41,6 @@ namespace Relecloud.Web
             }
             services.AddDbContextPool<ConcertDataContext>(options => options.UseSqlServer(Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
             services.AddScoped<IConcertRepository, SqlDatabaseConcertRepository>();
-            services.AddSingleton<ITicketRepository>(x => new CosmosDBTicketRepository(Configuration.GetValue<string>("App:CosmosDB:DatabaseUri"), Configuration.GetValue<string>("App:CosmosDB:DatabaseKey"), Configuration.GetValue<string>("App:CosmosDB:DatabaseId"), Configuration.GetValue<string>("App:CosmosDB:CollectionId")));
             services.AddScoped<IConcertSearchService>(x => new AzureSearchConcertSearchService(Configuration.GetValue<string>("App:AzureSearch:ServiceName"), Configuration.GetValue<string>("App:AzureSearch:AdminKey"), Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
             services.AddScoped<IEventSenderService>(x => new EventBusEventSenderService(Configuration.GetValue<string>("App:ServiceBus:ConnectionString"), Configuration.GetValue<string>("App:ServiceBus:QueueName")));
 

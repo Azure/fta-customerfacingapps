@@ -43,7 +43,7 @@ namespace Relecloud.Web.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var model = await this.concertRepository.GetByIdAsync(id);
+            var model = await this.concertRepository.GetConcertByIdAsync(id);
             if (model == null)
             {
                 return NotFound();

@@ -9,6 +9,8 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
     {
         public DbSet<Concert> Concerts { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Ticket> Tickets { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public ConcertDataContext(DbContextOptions<ConcertDataContext> options) : base(options)
         {
@@ -26,8 +28,10 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             // Enable change tracking on the database and table which can be used by the search service.
             var databaseName = this.Database.GetDbConnection().Database;
             var concertsTableName = nameof(Concerts);
-            this.Database.ExecuteSqlCommand($"ALTER DATABASE [{databaseName}] SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)");
-            this.Database.ExecuteSqlCommand($"ALTER TABLE [{concertsTableName}] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = ON)");
+            // Note: the cast to string is to work around an issue in Entity Framework Core 2.0 with string interpolation.
+            // See https://github.com/aspnet/EntityFrameworkCore/issues/9734.
+            this.Database.ExecuteSqlCommand((string)$"ALTER DATABASE [{databaseName}] SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)");
+            this.Database.ExecuteSqlCommand((string)$"ALTER TABLE [{concertsTableName}] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = ON)");
 
             var startDate = new DateTimeOffset(DateTimeOffset.UtcNow.Year, DateTimeOffset.UtcNow.Month, DateTimeOffset.UtcNow.Day, 20, 0, 0, TimeSpan.Zero);
             this.Concerts.AddRange(new[] {

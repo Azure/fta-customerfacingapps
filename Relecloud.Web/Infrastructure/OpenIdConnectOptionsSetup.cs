@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using Relecloud.Web.Models;
+using Relecloud.Web.Services;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -46,6 +49,7 @@ namespace Relecloud.Web.Infrastructure
             options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name" }; // Azure AD issues the user's display name in the "name" claim type.
             options.Events = new OpenIdConnectEvents()
             {
+                OnTokenValidated = OnTokenValidated,
                 OnRedirectToIdentityProvider = OnRedirectToIdentityProvider,
                 OnRemoteFailure = OnRemoteFailure
             };
@@ -54,6 +58,18 @@ namespace Relecloud.Web.Infrastructure
         #endregion
 
         #region OpenID Connect Event Handlers
+
+        public async Task OnTokenValidated(TokenValidatedContext context)
+        {
+            // The user has signed in, ensure the information in the database is up-to-date.
+            var user = new User
+            {
+                Id = context.Principal.GetUniqueId(),
+                DisplayName = context.Principal.Identity.Name
+            };
+            var concertRepository = context.HttpContext.RequestServices.GetRequiredService<IConcertRepository>();
+            await concertRepository.CreateOrUpdateUserAsync(user);
+        }
 
         public Task OnRedirectToIdentityProvider(RedirectContext context)
         {
