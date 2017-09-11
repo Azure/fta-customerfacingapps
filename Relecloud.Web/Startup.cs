@@ -11,8 +11,8 @@ using Microsoft.Extensions.Options;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Services;
 using Relecloud.Web.Services.AzureSearchService;
-using Relecloud.Web.Services.EventBusEventSenderService;
 using Relecloud.Web.Services.SqlDatabaseEventRepository;
+using Relecloud.Web.Services.StorageAccountEventSenderService;
 
 namespace Relecloud.Web
 {
@@ -48,7 +48,7 @@ namespace Relecloud.Web
             services.AddDbContextPool<ConcertDataContext>(options => options.UseSqlServer(Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
             services.AddScoped<IConcertRepository, SqlDatabaseConcertRepository>();
             services.AddScoped<IConcertSearchService>(x => new AzureSearchConcertSearchService(Configuration.GetValue<string>("App:AzureSearch:ServiceName"), Configuration.GetValue<string>("App:AzureSearch:AdminKey"), Configuration.GetValue<string>("App:SqlDatabase:ConnectionString")));
-            services.AddScoped<IEventSenderService>(x => new EventBusEventSenderService(Configuration.GetValue<string>("App:ServiceBus:ConnectionString"), Configuration.GetValue<string>("App:ServiceBus:QueueName")));
+            services.AddScoped<IEventSenderService>(x => new StorageAccountEventSenderService(Configuration.GetValue<string>("App:StorageAccount:ConnectionString"), Configuration.GetValue<string>("App:StorageAccount:EventQueueName")));
 
             // Add authentication.
             services.Configure<AuthenticationConfiguration>(Configuration.GetSection("App:Authentication"));

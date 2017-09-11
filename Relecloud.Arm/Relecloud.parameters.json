@@ -30,9 +30,6 @@
     // Traffic Manager
     "trafficManagerRoutingMethod": { "value": "Performance" },
 
-    // Cognitive Services
-    "cognitiveServicesSkuName": { "value": "S1" },
-
     // Azure Active Directory B2C
     "aadb2cClientId": { "value": "52491d14-a0f2-4876-a8e7-9548b2cbca72" },
     "aadb2cTenant": { "value": "relecloudconcerts.onmicrosoft.com" },

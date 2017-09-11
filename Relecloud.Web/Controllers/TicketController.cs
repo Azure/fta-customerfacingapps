@@ -13,14 +13,16 @@ namespace Relecloud.Web.Controllers
         #region Fields
 
         private readonly IConcertRepository concertRepository;
+        private readonly IEventSenderService eventSenderService;
 
         #endregion
 
         #region Constructors
 
-        public TicketController(IConcertRepository concertRepository)
+        public TicketController(IConcertRepository concertRepository, IEventSenderService eventSenderService)
         {
             this.concertRepository = concertRepository;
+            this.eventSenderService = eventSenderService;
         }
 
         #endregion
@@ -63,11 +65,10 @@ namespace Relecloud.Web.Controllers
                 var ticket = new Ticket
                 {
                     ConcertId = concertId,
-                    UserId = this.User.GetUniqueId(),
-                    Description = $"{concert.Artist} on {concert.StartTime.UtcDateTime.ToString()}",
-                    Price = concert.Price
+                    UserId = this.User.GetUniqueId()
                 };
                 await this.concertRepository.CreateTicketAsync(ticket);
+                await this.eventSenderService.SendEventAsync(Event.TicketCreated(ticket.Id));
             }
             return RedirectToAction(nameof(Index));
         }

@@ -14,9 +14,16 @@ else
         {
             <div class="list-group-item">
                 <h4 class="list-group-item-heading">
-                    <a asp-controller="Concert" asp-action="Details" asp-route-id="@ticket.ConcertId">@ticket.Description</a>
-                    <span class="label label-info">@ticket.Price.ToString("c")</span>
+                    <a asp-controller="Concert" asp-action="Details" asp-route-id="@ticket.ConcertId">@ticket.Concert.Artist</a>
                 </h4>
+                @if (string.IsNullOrEmpty(ticket.ImageUrl))
+                {
+                    <div class="offset-top-md alert alert-warning">Your ticket is being generated, please check back later.</div>
+                }
+                else
+                {
+                    <img src="@ticket.ImageUrl" alt="@ticket.Concert.Artist" class="img-responsive" />
+                }
             </div>
         }
     </div>

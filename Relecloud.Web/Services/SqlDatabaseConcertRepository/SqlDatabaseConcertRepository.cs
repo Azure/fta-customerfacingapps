@@ -63,7 +63,7 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
 
         public async Task<IList<Ticket>> GetAllTicketsAsync(string userId)
         {
-            return await this.database.Tickets.Where(t => t.UserId == userId).ToListAsync();
+            return await this.database.Tickets.Include(t => t.Concert).Where(t => t.UserId == userId).ToListAsync();
         }
 
         public async Task CreateOrUpdateUserAsync(User user)

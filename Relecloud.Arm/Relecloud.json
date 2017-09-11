@@ -135,17 +135,6 @@
         "Geographic"
       ]
     },
-    "cognitiveServicesSkuName": {
-      "type": "string",
-      "allowedValues": [
-        "F0",
-        "S1",
-        "S2",
-        "S3",
-        "S4"
-      ],
-      "defaultValue": "S1"
-    },
     "aadb2cClientId": {
       "type": "string"
     },
@@ -178,9 +167,7 @@
     "functionAppName": "[concat(parameters('resourcePrefix'), '-functions')]",
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "trafficManagerDnsName": "[parameters('resourcePrefix')]",
-    "serviceBusNamespaceName": "[concat(parameters('resourcePrefix'), '-servicebus')]",
-    "serviceBusQueueName": "events",
-    "cognitiveServicesAccountName": "[concat(parameters('resourcePrefix'), '-cognitiveservices')]"
+    "eventQueueName": "events"
   },
   "resources": [
     {
@@ -297,10 +284,9 @@
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:RedisCache:ConnectionString": "[concat(reference(resourceId('Microsoft.Cache/redis', variables('redisCacheName'))).hostName, ':', reference(resourceId('Microsoft.Cache/redis', variables('redisCacheName'))).sslPort, ',password=', listkeys(resourceId('Microsoft.Cache/redis', variables('redisCacheName')), providers('Microsoft.Cache', 'redis').apiVersions[0]).primaryKey, ',ssl=True,abortConnect=False,syncTimeout=2000,allowAdmin=true')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
+            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]",
             "App:AzureSearch:ServiceName": "[variables('searchServiceName')]",
             "App:AzureSearch:AdminKey": "[listAdminKeys(resourceId('Microsoft.Search/searchServices', variables('searchServiceName')), '2015-02-28').primaryKey]",
-            "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
-            "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]",
             "App:Authentication:ClientId": "[parameters('aadb2cClientId')]",
             "App:Authentication:Tenant": "[parameters('aadb2cTenant')]",
             "App:Authentication:SignUpSignInPolicyId": "[parameters('aadb2cSignUpSignInPolicyId')]",
@@ -613,11 +599,8 @@
             "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
-            "App:ServiceBus:ConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('serviceBusNamespaceName'),'RootManageSharedAccessKey'),'2015-08-01').primaryConnectionString]",
-            "App:ServiceBus:QueueName": "[variables('serviceBusQueueName')]",
-            "App:CognitiveServices:AccountName": "[variables('cognitiveServicesAccountName')]",
-            "App:CognitiveServices:EndpointUri": "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment",
-            "App:CognitiveServices:ApiKey": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('cognitiveServicesAccountName')),'2017-04-18').key1]"
+            "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
+            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]",
           }
         }
       ]
@@ -659,46 +642,6 @@
       },
       "tags": {
         "displayName": "TrafficManagerWebsiteEndpoint"
-      }
-    },
-    {
-      "apiVersion": "2015-08-01",
-      "name": "[variables('serviceBusNamespaceName')]",
-      "type": "Microsoft.ServiceBus/namespaces",
-      "location": "[resourceGroup().location]",
-      "properties": {
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-08-01",
-          "name": "[variables('serviceBusQueueName')]",
-          "type": "Queues",
-          "dependsOn": [
-            "[concat('Microsoft.ServiceBus/namespaces/', variables('serviceBusNamespaceName'))]"
-          ],
-          "properties": {
-          },
-          "tags": {
-            "displayName": "ServiceBusQueue"
-          }
-        }
-      ],
-      "tags": {
-        "displayName": "ServiceBusNamespace"
-      }
-    },
-    {
-      "apiVersion": "2016-02-01-preview",
-      "name": "[variables('cognitiveServicesAccountName')]",
-      "location": "westus",
-      "type": "Microsoft.CognitiveServices/accounts",
-      "kind": "TextAnalytics",
-      "sku": {
-        "name": "[parameters('cognitiveServicesSkuName')]"
-      },
-      "properties": {},
-      "tags": {
-        "displayName": "CognitiveServices"
       }
     }
   ]

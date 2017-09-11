@@ -20,12 +20,12 @@
             };
         }
 
-        public static Event TicketCreated(string ticketId)
+        public static Event TicketCreated(int ticketId)
         {
             return new Event
             {
                 EventType = "TicketCreated",
-                EntityId = ticketId
+                EntityId = ticketId.ToString()
             };
         }
 
