@@ -291,7 +291,8 @@
             "App:Authentication:Tenant": "[parameters('aadb2cTenant')]",
             "App:Authentication:SignUpSignInPolicyId": "[parameters('aadb2cSignUpSignInPolicyId')]",
             "App:Authentication:ResetPasswordPolicyId": "[parameters('aadb2cResetPasswordPolicyId')]",
-            "App:Authentication:EditProfilePolicyId": "[parameters('aadb2cEditProfilePolicyId')]"
+            "App:Authentication:EditProfilePolicyId": "[parameters('aadb2cEditProfilePolicyId')]",
+            "ApplicationInsights:InstrumentationKey": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]"
           }
         }
       ]
@@ -600,7 +601,7 @@
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
-            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]",
+            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]"
           }
         }
       ]
