@@ -9,10 +9,11 @@ namespace Relecloud.Web.Services
     {
         void Initialize();
         Task<Concert> GetConcertByIdAsync(int id);
-        Task<IList<Concert>> GetUpcomingConcertsAsync(int count);
+        Task<ICollection<Concert>> GetConcertsByIdAsync(ICollection<int> ids);
+        Task<ICollection<Concert>> GetUpcomingConcertsAsync(int count);
         Task AddReviewAsync(Review review);
         Task CreateTicketAsync(Ticket ticket);
-        Task<IList<Ticket>> GetAllTicketsAsync(string userId);
+        Task<ICollection<Ticket>> GetAllTicketsAsync(string userId);
         Task CreateOrUpdateUserAsync(User user);
     }
 }

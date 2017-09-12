@@ -30,7 +30,12 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             return await this.database.Concerts.Where(c => c.Id == id).Include(c => c.Reviews).SingleOrDefaultAsync();
         }
 
-        public async Task<IList<Concert>> GetUpcomingConcertsAsync(int count)
+        public async Task<ICollection<Concert>> GetConcertsByIdAsync(ICollection<int> ids)
+        {
+            return await this.database.Concerts.Where(c => ids.Contains(c.Id)).ToListAsync();
+        }
+
+        public async Task<ICollection<Concert>> GetUpcomingConcertsAsync(int count)
         {
             IList<Concert> concerts;
             var concertsJson = await this.cache.GetStringAsync("UpcomingConcerts");
@@ -61,7 +66,7 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             await this.database.SaveChangesAsync();
         }
 
-        public async Task<IList<Ticket>> GetAllTicketsAsync(string userId)
+        public async Task<ICollection<Ticket>> GetAllTicketsAsync(string userId)
         {
             return await this.database.Tickets.Include(t => t.Concert).Where(t => t.UserId == userId).ToListAsync();
         }

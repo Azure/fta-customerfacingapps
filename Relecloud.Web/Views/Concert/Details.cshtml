@@ -8,7 +8,7 @@
 </h1>
 <div class="text-muted">@Model.StartTime.UtcDateTime.ToString() &raquo; @Model.Location</div>
 <div class="well offset-top-md">@Model.Description</div>
-<a asp-controller="Ticket" asp-action="Buy" asp-route-concertId="@Model.Id" class="btn btn-success">Buy Tickets &raquo;</a>
+<a asp-controller="Cart" asp-action="Add" asp-route-concertId="@Model.Id" class="btn btn-success">Add To Cart &raquo;</a>
 
 <fieldset>
     <legend>User Reviews</legend>

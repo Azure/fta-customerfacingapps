@@ -67,7 +67,6 @@ namespace Relecloud.Web.Controllers
 
         [Authorize]
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Review(Review review)
         {
             if (ModelState.IsValid)

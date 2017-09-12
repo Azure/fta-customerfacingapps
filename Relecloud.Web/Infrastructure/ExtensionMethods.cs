@@ -1,4 +1,6 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System.Security.Claims;
 
 namespace Relecloud.Web.Infrastructure
 {
@@ -8,6 +10,17 @@ namespace Relecloud.Web.Infrastructure
         {
             // Azure AD issues a globally unique user ID in the objectidentifier claim.
             return user?.FindFirstValue("http://schemas.microsoft.com/identity/claims/objectidentifier");
+        }
+
+        public static void Set<T>(this ISession session, string key, T value)
+        {
+            session.SetString(key, JsonConvert.SerializeObject(value));
+        }
+
+        public static T Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
         }
     }
 }
