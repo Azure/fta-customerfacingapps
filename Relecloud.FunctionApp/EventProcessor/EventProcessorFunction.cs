@@ -62,12 +62,12 @@ namespace Relecloud.FunctionApp.EventProcessor
                         graphics.SmoothingMode = SmoothingMode.AntiAlias;
                         graphics.Clear(Color.White);
 
-                        // Add concert details.
+                        // Print concert details.
                         graphics.DrawString(artist, headerFont, Brushes.DarkSlateBlue, new PointF(10, 10));
                         graphics.DrawString($"{location}   |   {startTime.UtcDateTime.ToString()}", textFont, Brushes.Gray, new PointF(10, 40));
                         graphics.DrawString($"{userName}   |   {price.ToString("c")}", textFont, Brushes.Gray, new PointF(10, 60));
 
-                        // Add a fake barcode.
+                        // Print a fake barcode.
                         var random = new Random();
                         var offset = 15;
                         while (offset < 620)
@@ -77,13 +77,13 @@ namespace Relecloud.FunctionApp.EventProcessor
                             offset += width + (2 * random.Next(1, 3));
                         }
 
-                        // Upload to blob storage.
+                        // Save to blob storage.
                         log.Info("Uploading image to blob storage...");
                         bitmap.Save(outputStream, ImageFormat.Png);
                     }
                 }
 
-                // Update the ticket with the image URL.
+                // Update the ticket in the database with the image URL.
                 var policy = new SharedAccessBlobPolicy { Permissions = SharedAccessBlobPermissions.Read, SharedAccessExpiryTime = DateTimeOffset.MaxValue };
                 var imageUrl = ticketImageBlob.Uri.ToString() + ticketImageBlob.GetSharedAccessSignature(policy);
                 log.Info($"Updating ticket with image URL {imageUrl}...");

@@ -9,7 +9,6 @@ namespace Relecloud.Web.Models
         [Range(1, 5)]
         public int Rating { get; set; }
         public string Description { get; set; }
-        public float? SentimentScore { get; set; }
         public DateTimeOffset CreatedTime { get; set; }
 
         public int ConcertId { get; set; }

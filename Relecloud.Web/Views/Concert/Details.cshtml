@@ -19,7 +19,6 @@
     @foreach (var review in Model.Reviews)
     {
         var ratingCssClass = review.Rating <= 1 ? "text-danger" : (review.Rating <= 2 ? "text-warning" : (review.Rating <= 3 ? "text-primary" : (review.Rating <= 4 ? "text-info" : "text-success")));
-        var sentimentCssClass = !review.SentimentScore.HasValue ? string.Empty : (review.SentimentScore < 0.2f ? "text-danger" : (review.SentimentScore < 0.4f ? "text-warning" : (review.SentimentScore < 0.6f ? "text-primary" : (review.SentimentScore < 0.8f ? "text-info" : "text-success"))));
         <div class="media">
             <div class="media-left">
                 <span class="glyphicon glyphicon-user" aria-hidden="true" style="width: 64px; height: 64px; font-size: 64px;"></span>
@@ -34,7 +33,6 @@
                     </span>
                 </h4>
                 <div>@review.Description</div>
-                <div class="offset-top-md small @sentimentCssClass">Sentiment Score: @(review.SentimentScore.HasValue ? review.SentimentScore.Value.ToString("0.00") : "Undetermined")</div>
                 <div class="small text-muted">@review.CreatedTime.UtcDateTime.ToString()</div>
             </div>
         </div>
