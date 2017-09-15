@@ -90,7 +90,7 @@ namespace Relecloud.Web.Services.AzureSearchService
 
         #region Search
 
-        public async Task<IList<ConcertSearchResult>> SearchAsync(string query)
+        public async Task<ICollection<ConcertSearchResult>> SearchAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
             {

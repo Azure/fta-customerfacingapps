@@ -7,6 +7,6 @@ namespace Relecloud.Web.Services
     public interface IConcertSearchService
     {
         void Initialize();
-        Task<IList<ConcertSearchResult>> SearchAsync(string query);
+        Task<ICollection<ConcertSearchResult>> SearchAsync(string query);
     }
 }
