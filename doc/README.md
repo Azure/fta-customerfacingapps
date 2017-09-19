@@ -1,22 +1,50 @@
 ﻿# POC Scenario: E-commerce Website
 
-## Abstract
+## Table Of Contents
+
+* [Introduction](#introduction)
+  * [Abstract](#abstract)
+  * [Learning objectives](#learning-objectives)
+* [Preparation](#preparation)
+  * [Prerequisites](#prerequisites)
+  * [Plan your deployment](#plan-your-deployment)
+  * [Open the application with Visual Studio](#open-the-application-with-visual-studio)
+* [Deployment Steps - Core Services](#deployment-steps---core-services)
+  * [Create an Azure Resource Group](#create-an-azure-resource-group)
+  * [Deploy the Web App](#deploy-the-web-app)
+  * [Create the SQL Database containing the concerts](#create-the-sql-database-containing-the-concerts)
+  * [Enable user sign-in via Azure AD B2C](#enable-user-sign-in-via-azure-ad-b2c)
+  * [Set up Azure Search connected to the SQL Database](#set-up-azure-search-connected-to-the-sql-database)
+  * [Enable background ticket image generation via a Function App](#enable-background-ticket-image-generation-via-a-function-app)
+* [Deployment Steps - Optional Services](#deployment-steps---optional-services)
+  * [Add caching of upcoming concerts using Redis Cache](#add-caching-of-upcoming-concerts-using-redis-cache)
+  * [Set up monitoring and analytics using Application Insights](#set-up-monitoring-and-analytics-using-application-insights)
+  * [Prepare the web app for global availability using Traffic Manager](#prepare-the-web-app-for-global-availability-using-traffic-manager)
+* [Next Steps](#next-steps)
+  * [Deploy using an ARM Template](#deploy-using-an-arm-template)
+  * [Add social logins](#add-social-logins)
+  * [Improve the search experience](#improve-the-search-experience)
+  * [Add multiple web app instances](#add-multiple-web-app-instances)
+
+## Introduction
+
+#### Abstract
 Azure Platform-as-a-Service (PaaS) enables you to deploy enterprise grade e-commerce applications, and lets you adapt to the size and seasonality of your business. When demand for your products or services takes off — predictably or unpredictably — you can be prepared to handle more customers and more transactions automatically. Additionally, take advantage of cloud economics by paying only for the capacity you use. In short, focus on your sales and leave the infrastructure management to your cloud provider.
 
 During this guided Proof-Of-Concept (POC) scenario, you will learn about bringing together various Azure PaaS components to deploy a sample e-commerce application, _Relecloud Concerts_, an online concert ticket platform.
 
-## Learning objectives
+#### Learning objectives
 * Understanding Azure App Service platform and building on Web Apps with SQL Database
 * Implementing search, user sign-up, background task processing, and caching
 * Gaining insights into application and user behavior with Application Insights
 * Implementing continuous integration and continuous deployment workflows for your app 
 
-## Prerequisites
+## Preparation
+
+#### Prerequisites
 To complete this scenario, you will need:
 * Visual Studio 2017 with the "Azure development" features and ASP.NET Core 2.0
 * An Azure subscription
-
-## Steps
 
 #### Plan your deployment
 * As part of this scenario, you will be deploying the following resources into a Resource Group:
@@ -47,9 +75,11 @@ To complete this scenario, you will need:
   * The `Relecloud.Web` project contains the main e-commerce web application
     * This will be deployed as an Azure Web App
     * Especially the `Startup.cs` file is important as it contains the logic to hook up the necessary services based on configuration
-    * If configuration is missing, the service will be replaced by a dummy implementation so you can build up the solution gradually
+    * If a configuration setting is missing for a certain Azure service, it  will be replaced by a dummy implementation so you can build up the solution gradually without running into errors
   * The `Relecloud.FunctionApp` project contains functions to perform background event processing
     * This will be deployed as an Azure Function App
+
+## Deployment Steps - Core Services
 
 #### Create an Azure Resource Group
 > This allows you to group all the Azure resources mentioned above in a single container for easier management
@@ -140,22 +170,6 @@ App:Authentication:EditProfilePolicyId | The name of the profile editing policy,
   * Important to note is that **no user credentials are ever stored or managed in the application database**: the complete identity management experience is handled and secured by Azure AD B2C
   * Also note that it is possible to completely [customize the user experience presented by Azure AD B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-ui-customization-custom) (e.g. to use custom branding images or a completely new look to match the style of your web application)
 
-#### Add caching of upcoming concerts using Redis Cache
-> This increases the performance of the most visited page of the web application by keeping the list of upcoming concerts in a memory cache for fast retrieval
-
-* Go back to your Resource Group in the Azure Portal and [create a new Redis Cache](https://docs.microsoft.com/en-us/azure/redis-cache/cache-dotnet-how-to-use-azure-redis-cache#create-cache)
-  * _Suggested name for the DNS name: `<prefix>-redis`_
-  * Choose `Basic C0` or higher as the pricing tier
-  * After the Redis Cache has been created, navigate to the **Access keys** blade and copy the **Primary connection string (StackExchange.Redis)** to the clipboard
-* Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
-
-Name | Value
----- | -----
-App:RedisCache:ConnectionString | The connection string you copied before
-
-* Browse to the site again, it should now be showing the same upcoming concerts page (with improved performance if at all noticeable)
-
 #### Set up Azure Search connected to the SQL Database
 > This allows your users to perform powerful searches for the concerts in the database with hit highlighting
 
@@ -218,6 +232,24 @@ App:SqlDatabase:ConnectionString | The same as in the Web App
   * The ticket image will be generated in the background by the Function App (triggered by a message in a queue), stored into blob storage, at which point the ticket in the database will be updated with a URL to the image (secured by a [Shared Access Signature](https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1))
   * After a little while, a ticket image should appear when you refresh the tickets page
 
+## Deployment Steps - Optional Services
+
+#### Add caching of upcoming concerts using Redis Cache
+> This increases the performance of the most visited page of the web application by keeping the list of upcoming concerts in a memory cache for fast retrieval
+
+* Go back to your Resource Group in the Azure Portal and [create a new Redis Cache](https://docs.microsoft.com/en-us/azure/redis-cache/cache-dotnet-how-to-use-azure-redis-cache#create-cache)
+  * _Suggested name for the DNS name: `<prefix>-redis`_
+  * Choose `Basic C0` or higher as the pricing tier
+  * After the Redis Cache has been created, navigate to the **Access keys** blade and copy the **Primary connection string (StackExchange.Redis)** to the clipboard
+* Navigate to the App Service for the Web App and open the **Application settings** blade
+  * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
+
+Name | Value
+---- | -----
+App:RedisCache:ConnectionString | The connection string you copied before
+
+* Browse to the site again, it should now be showing the same upcoming concerts page (with improved performance if at all noticeable)
+
 #### Set up monitoring and analytics using Application Insights
 > This allows you to get insights on user and application behavior
 
@@ -264,7 +296,7 @@ ApplicationInsights:InstrumentationKey | The instrumentation key you copied befo
 
 This concludes the scenario. Please find some additional things you can do at this point below.
 
-#### ARM Template Deployment
+#### Deploy using an ARM Template
 As an alternative to manually setting up all the necessary resources in Azure and connecting the various services together (e.g. configuring App Settings to connect to other resources, enlisting the main Web App into Traffic Manager, ...), you can use an Azure Resource Manager (ARM) template
 * Learn more about [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-manager-create-first-template)
 * The ARM template for this solution is included in the [Relecloud.Arm](../src/Relecloud.Arm) folder
@@ -275,10 +307,10 @@ As an alternative to manually setting up all the necessary resources in Azure an
   * ...
 * After the various resources have been created, you only have to publish the `Relecloud.Web` project to the Azure Web App, and the `Relecloud.FunctionApp` project to the Azure Function App as explained above (the app settings for both are automatically populated)
 
-#### Add Social Logins
+#### Add social logins
 > Allow users to sign in using their existing Microsoft, Facebook, Google, ... account
 
-#### Improve Search
+#### Improve the search experience
 > Add faceting, filtering, scoring functions, ...
 
 #### Add multiple web app instances
