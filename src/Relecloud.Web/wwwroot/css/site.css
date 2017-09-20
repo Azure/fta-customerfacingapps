@@ -86,3 +86,26 @@ input[type="checkbox"].input-validation-error {
 .validation-summary-errors {
     color: #b94a48;
 }
+
+/* Jumbotron */
+
+.jumbotron {
+    margin-top: 30px;
+    padding: 0 !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+.jumbotron-content {
+    min-height: 500px;
+    padding: 60px;
+    background-color: #fff;
+    opacity: 0.60;
+    filter: alpha(opacity=60); /* For IE8 and earlier */
+}
+
+footer {
+    border-top: 1px solid #e5e5e5;
+    padding-top: 10px;
+}

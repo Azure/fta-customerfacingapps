@@ -34,7 +34,6 @@
                     <li><a asp-controller="Concert" asp-action="Index">Upcoming</a></li>
                     <li><a asp-controller="Cart" asp-action="Index">Cart</a></li>
                     <li><a asp-controller="Ticket" asp-action="Index">Tickets</a></li>
-                    <li><a asp-controller="Home" asp-action="About">About</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     @if (User.Identity.IsAuthenticated)
@@ -59,9 +58,16 @@
     </nav>
     <div class="container body-content">
         @RenderBody()
-        <hr />
         <footer>
-            <p>&copy; Relecloud Concerts</p>
+            <p class="copyright text-muted small">
+                &copy; @DateTime.Now.Year Microsoft
+                &middot;
+                This site is used only for demonstration purposes, no rights may be derived from it
+                &middot;
+                <a href="https://privacy.microsoft.com/en-us/privacystatement">Privacy &amp; Cookies</a>
+                &middot;
+                <a href="http://go.microsoft.com/fwlink/?LinkID=206977">Terms of Use</a>
+            </p>
         </footer>
     </div>
 
