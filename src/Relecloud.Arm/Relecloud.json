@@ -177,7 +177,7 @@
     "searchServiceHostingMode": "Default",
     "functionAppName": "[concat(parameters('resourcePrefix'), '-functions')]",
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
-    "trafficManagerDnsName": "[parameters('resourcePrefix')]",
+    "trafficManagerDnsName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "eventQueueName": "events",
     "cognitiveServicesAccountName": "[concat(parameters('resourcePrefix'), '-cognitiveservices')]"
   },
