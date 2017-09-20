@@ -149,6 +149,17 @@
     },
     "aadb2cEditProfilePolicyId": {
       "type": "string"
+    },
+    "cognitiveServicesSkuName": {
+      "type": "string",
+      "allowedValues": [
+        "F0",
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "defaultValue": "S1"
     }
   },
   "variables": {
@@ -167,7 +178,8 @@
     "functionAppName": "[concat(parameters('resourcePrefix'), '-functions')]",
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "trafficManagerDnsName": "[parameters('resourcePrefix')]",
-    "eventQueueName": "events"
+    "eventQueueName": "events",
+    "cognitiveServicesAccountName": "[concat(parameters('resourcePrefix'), '-cognitiveservices')]"
   },
   "resources": [
     {
@@ -601,7 +613,9 @@
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
-            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]"
+            "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]",
+            "App:CognitiveServices:EndpointUri": "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0",
+            "App:CognitiveServices:ApiKey": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('cognitiveServicesAccountName')),'2017-04-18').key1]"
           }
         }
       ]
@@ -643,6 +657,20 @@
       },
       "tags": {
         "displayName": "TrafficManagerWebsiteEndpoint"
+      }
+    },
+    {
+      "apiVersion": "2016-02-01-preview",
+      "name": "[variables('cognitiveServicesAccountName')]",
+      "location": "westus",
+      "type": "Microsoft.CognitiveServices/accounts",
+      "kind": "TextAnalytics",
+      "sku": {
+        "name": "[parameters('cognitiveServicesSkuName')]"
+      },
+      "properties": {},
+      "tags": {
+        "displayName": "CognitiveServices"
       }
     }
   ]

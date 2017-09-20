@@ -1,6 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 using System;
 using System.Configuration;
 using System.Data.SqlClient;
@@ -8,12 +9,16 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Relecloud.FunctionApp.EventProcessor
 {
     public static class EventProcessorFunction
     {
+        #region Run
+
         [FunctionName("EventProcessor")]
         public static async Task Run(
             [QueueTrigger("%App:StorageAccount:EventQueueName%", Connection = "App:StorageAccount:ConnectionString")]Event eventInfo,
@@ -25,9 +30,26 @@ namespace Relecloud.FunctionApp.EventProcessor
             if (string.Equals(eventInfo.EventType, "TicketCreated", StringComparison.OrdinalIgnoreCase))
             {
                 var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
-                await CreateTicketImageAsync(sqlDatabaseConnectionString, int.Parse(eventInfo.EntityId), ticketImageBlob, log);
+                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString))
+                {
+                    await CreateTicketImageAsync(sqlDatabaseConnectionString, int.Parse(eventInfo.EntityId), ticketImageBlob, log);
+                }
+            }
+            else if (string.Equals(eventInfo.EventType, "ReviewCreated", StringComparison.OrdinalIgnoreCase))
+            {
+                var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
+                var cognitiveServicesEndpointUri = ConfigurationManager.AppSettings["App:CognitiveServices:EndpointUri"];
+                var cognitiveServicesApiKey = ConfigurationManager.AppSettings["App:CognitiveServices:ApiKey"];
+                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString) && !string.IsNullOrWhiteSpace(cognitiveServicesEndpointUri) && !string.IsNullOrWhiteSpace(cognitiveServicesApiKey))
+                {
+                    await CalculateReviewSentimentScoreAsync(sqlDatabaseConnectionString, cognitiveServicesEndpointUri, cognitiveServicesApiKey, eventInfo.EntityId, log);
+                }
             }
         }
+
+        #endregion
+
+        #region Create Ticket Image
 
         private static async Task CreateTicketImageAsync(string sqlDatabaseConnectionString, int ticketId, CloudBlockBlob ticketImageBlob, TraceWriter log)
         {
@@ -94,5 +116,55 @@ namespace Relecloud.FunctionApp.EventProcessor
                 await updateTicketCommand.ExecuteNonQueryAsync();
             }
         }
+
+        #endregion
+
+        #region Calculate Review Sentiment Score
+
+        private static async Task CalculateReviewSentimentScoreAsync(string sqlDatabaseConnectionString, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey, string reviewId, TraceWriter log)
+        {
+            using (var connection = new SqlConnection(sqlDatabaseConnectionString))
+            {
+                await connection.OpenAsync();
+
+                // Retrieve the review description.
+                log.Info($"Retrieving description for review \"{reviewId}\" from SQL Database...");
+                var getDescriptionCommand = connection.CreateCommand();
+                getDescriptionCommand.CommandText = "SELECT Description FROM Reviews WHERE Id=@id";
+                getDescriptionCommand.Parameters.Add(new SqlParameter("id", reviewId));
+                var reviewDescription = (string)await getDescriptionCommand.ExecuteScalarAsync();
+
+                // Perform a sentiment analysis on the text.
+                // Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment.
+                log.Info($"Performing sentiment analysis on text: \"{reviewDescription}\"...");
+                var sentimentScore = await GetSentimentScoreAsync(reviewDescription, cognitiveServicesEndpointUri, cognitiveServicesApiKey);
+
+                // Update the document with the sentiment value.
+                log.Info($"Updating review with sentiment score {sentimentScore}...");
+                var updateSentimentScoreCommand = connection.CreateCommand();
+                updateSentimentScoreCommand.CommandText = "UPDATE Reviews SET SentimentScore=@sentimentScore WHERE Id=@id";
+                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("id", reviewId));
+                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("sentimentScore", sentimentScore));
+                await updateSentimentScoreCommand.ExecuteNonQueryAsync();
+            }
+        }
+
+        private static async Task<float> GetSentimentScoreAsync(string text, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey)
+        {
+            using (var client = new HttpClient())
+            {
+                var sentimentApiUrl = cognitiveServicesEndpointUri + "/sentiment";
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", cognitiveServicesApiKey);
+                var request = new { documents = new[] { new { language = "en", id = "001", text = text } } };
+                var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(sentimentApiUrl, content);
+                response.EnsureSuccessStatusCode();
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var dynamicResponse = (dynamic)JsonConvert.DeserializeObject(responseBody);
+                return (float)dynamicResponse.documents[0].score;
+            }
+        }
+
+        #endregion
     }
 }

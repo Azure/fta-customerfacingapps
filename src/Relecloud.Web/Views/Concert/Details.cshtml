@@ -33,6 +33,12 @@
                     </span>
                 </h4>
                 <div>@review.Description</div>
+                @if (review.SentimentScore.HasValue)
+                {
+                    var sentimentCssClass = review.SentimentScore < 0.2f ? "text-danger" : (review.SentimentScore < 0.4f ? "text-warning" : (review.SentimentScore < 0.6f ? "text-primary" : (review.SentimentScore < 0.8f ? "text-info" : "text-success")));
+                    var sentimentScoreInterpretation = review.SentimentScore < 0.2f ? "very negative" : (review.SentimentScore < 0.4f ? "fairly negative" : (review.SentimentScore < 0.6f ? "neutral" : (review.SentimentScore < 0.8f ? "fairly positive" : "very positive")));
+                    <div class="small @sentimentCssClass">Sentiment Score: @review.SentimentScore.Value.ToString("0.000") (@sentimentScoreInterpretation)</div>
+                }
                 <div class="small text-muted">@review.CreatedTime.UtcDateTime.ToString()</div>
             </div>
         </div>
