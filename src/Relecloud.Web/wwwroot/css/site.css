@@ -108,4 +108,5 @@ input[type="checkbox"].input-validation-error {
 footer {
     border-top: 1px solid #e5e5e5;
     padding-top: 10px;
+    margin-top: 10px;
 }
