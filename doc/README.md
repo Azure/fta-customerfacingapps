@@ -19,6 +19,7 @@
 * [Deployment Steps - Optional Services](#deployment-steps---optional-services)
   * [Add caching of upcoming concerts using Redis Cache](#add-caching-of-upcoming-concerts-using-redis-cache)
   * [Set up monitoring and analytics using Application Insights](#set-up-monitoring-and-analytics-using-application-insights)
+  * [Add sentiment analysis for reviews using Cognitive Services](#add-sentiment-analysis-for-reviews-using-cognitive-services)
   * [Prepare the web app for global availability using Traffic Manager](#prepare-the-web-app-for-global-availability-using-traffic-manager)
 * [Next Steps](#next-steps)
   * [Deploy using an ARM Template](#deploy-using-an-arm-template)
@@ -218,8 +219,8 @@ App:StorageAccount:EventQueueName | A name for the queue through which event mes
   * Choose the Storage Account you created before to store the required function app state
   * _Suggested name for the App Service Plan: `<prefix>-func-plan`_
   * _Suggested name for the App Service: `<prefix>-func-app`_
-* Navigate to the Function App in the Azure Portal and open the **Function app settings** blade
-  * Under **App settings**, add the following new configuration settings:
+* Navigate to the Function App in the Azure Portal and open the **Application settings** tab
+  * Under **Application settings**, add the following new configuration settings:
 
 Name | Value
 ---- | -----
@@ -268,6 +269,28 @@ ApplicationInsights:InstrumentationKey | The instrumentation key you copied befo
 * Go to the **Overview** blade of your Application Insights resource and open the **Search** blade
   * This allows you to see incoming data in near real time
 * [Learn more about Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-overview) to understand what else you can do with this very powerful service
+
+#### Add sentiment analysis for reviews using Cognitive Services
+> This allows you to determine whether the sentiment of a user review is positive or negative
+
+* Go back to your Resource Group in the Azure Portal and [create a new Cognitive Services API](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account)
+  * _Suggested name for the Cognitive Services resource: `<prefix>-cognitiveservices`_
+  * For the **API type**, choose **Text Analytics API**
+  * For the **Pricing tier**, choose the **Free F0** if possible (there is a limit of one free account per subscription) or the **Standard S1** otherwise
+* After the Cognitive Service has been created
+  * Open the **Overview** blade and copy the **Endpoint** URL to Notepad
+  * Open the **Keys** blade and copy **Key 1** to Notepad
+* Navigate to the Function App in the Azure Portal and open the **Application settings** tab
+  * Under **Application settings**, add the following new configuration settings:
+
+Name | Value
+---- | -----
+App:CognitiveServices:EndpointUri | The Endpoint URL you copied before
+App:CognitiveServices:ApiKey | The key you copied before
+
+* Browse to the site again and add some reviews
+  * The sentiment of the review will be analyzed in the background by the Function App (triggered by a message in a queue), at which point the review in the database will be updated with a score
+  * After a little while, a sentiment score should appear for a review when you refresh the concert details page
 
 #### Prepare the web app for global availability using Traffic Manager
 > This allows you to prepare for global availability of your e-commerce site so that users always connect to the web app instance that is closest to their location
