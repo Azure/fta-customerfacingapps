@@ -1,1 +1,0 @@
-## This content has moved [here](../ecommerce/doc/README.md)
