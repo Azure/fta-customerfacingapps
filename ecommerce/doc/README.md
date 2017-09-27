@@ -77,7 +77,7 @@ To complete this scenario, you will need:
 #### Open the application with Visual Studio
 * Clone the repository or copy the project's [source code](../src) to a local working folder
 * From the working folder, open **Relecloud.sln** with Visual Studio
-  ![Visual Studio Solution](images/visualstudio-solution.png)
+* ![Visual Studio Solution](images/visualstudio-solution.png)
 * Explore the solution
   * The `Relecloud.Web` project contains the main e-commerce web application
     * This will be deployed as an Azure Web App
@@ -94,7 +94,7 @@ To complete this scenario, you will need:
 * Navigate to the [Azure Portal](https://portal.azure.com) and sign in with your account
 * [Create a Resource Group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal)
   * _Suggested name for the Resource Group: `<prefix>-prod-rg`_
-![Create Resource Group](images/resourcegroup-create.png)
+  * ![Create Resource Group](images/resourcegroup-create.png)
 
 #### Deploy the Web App
 > This allows users to visit your e-commerce web application
@@ -108,7 +108,7 @@ To complete this scenario, you will need:
   * Ensure to create the App Service Plan in the Resource Group you created before
   * Ensure to create the App Service Plan in the same Azure region as the Resource Group
   * Choose `S1 Standard` or higher as the pricing tier for the App Service Plan (lower pricing tiers do not support Traffic Manager which we can use later on)
-  ![Deploy Web App](images/webapp-deploy.png)
+  * ![Deploy Web App](images/webapp-deploy.png)
 * After the deployment is complete, browse to the site at `http://<your-site-name>.azurewebsites.net`
   * You should be able to navigate around the site but there will not be any concerts and signing in will not work
 
