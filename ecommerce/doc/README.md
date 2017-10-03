@@ -32,20 +32,20 @@
 #### Abstract
 Azure Platform-as-a-Service (PaaS) enables you to deploy enterprise grade e-commerce applications, and lets you adapt to the size and seasonality of your business. When demand for your products or services takes off — predictably or unpredictably — you can be prepared to handle more customers and more transactions automatically. Additionally, take advantage of cloud economics by paying only for the capacity you use. In short, focus on your sales and leave the infrastructure management to your cloud provider.
 
-During this guided Proof-Of-Concept (POC) scenario, you will learn about bringing together various Azure PaaS components to deploy a sample e-commerce application, _Relecloud Concerts_, an online concert ticket platform.
+During this guided Proof-Of-Concept (POC) scenario, you will learn about bringing together various Azure PaaS components to deploy a sample e-commerce application, _Relecloud Concerts_, an online concert ticketing platform.
 
 #### Learning objectives
-* Understanding Azure App Service platform and building on Web Apps with SQL Database
+* Understanding the Azure App Service platform and building Web Apps with SQL Database
 * Implementing search, user sign-up, background task processing, and caching
 * Gaining insights into application and user behavior with Application Insights
-* Implementing continuous integration and continuous deployment workflows for your app 
+* Implementing continuous integration and continuous deployment workflows for your application 
 
 ## Preparation
 
 #### Prerequisites
 To complete this scenario, you will need:
 * Visual Studio 2017 Update 3 or later with the "Azure development" features
-* ASP.NET Core 2.0
+* [ASP.NET Core 2.0](https://www.microsoft.com/net/core)
 * An Azure subscription
 
 #### Plan your deployment
@@ -60,7 +60,7 @@ To complete this scenario, you will need:
   * Cognitive Services
   * Traffic Manager
 * When choosing names for your resources, try to follow a **standard naming pattern**, e.g. by following the [naming conventions documented on the Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions)
-  * To make it easier, we'll provide suggestions that are based on a naming prefix of your choosing, referred to as `<prefix>` from this point onwards
+  * To make it easier, we'll provide suggestions based on a naming prefix of your choosing, referred to as `<prefix>` from this point onwards
   * To ensure that your deployment does not conflict with other Azure customers, use a prefix that is unique to your organization
   * To ensure that your chosen prefix can be used for all resource types, use a relatively short name consisting only of lowercase letters (no digits, no other special characters) e.g. `contoso`
 * Choose an **Azure region** to host your deployment
@@ -81,14 +81,14 @@ To complete this scenario, you will need:
 * Explore the solution
   * The `Relecloud.Web` project contains the main e-commerce web application
     * This will be deployed as an Azure Web App
-    * Especially the `Startup.cs` file is important as it contains the logic to hook up the necessary services based on configuration
+    * Especially the `Startup.cs` file is important as it contains the logic to hook up the necessary services based on the configuration
     * If a configuration setting is missing for a certain Azure service, it  will be replaced by a dummy implementation so you can build up the solution gradually without running into errors
   * The `Relecloud.FunctionApp` project contains functions to perform background event processing
     * This will be deployed as an Azure Function App
 
 ## Deployment Steps - Core Services
 
-#### Create an Azure Resource Group
+#### Create a Resource Group
 > This allows you to group all the Azure resources mentioned above in a single container for easier management
 
 * Navigate to the [Azure Portal](https://portal.azure.com) and sign in with your account
@@ -134,7 +134,7 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
 
 ![Configure Web App](images/webapp-settings-sqldatabase.png)
 
-* Browse to the site again, it should now be showing a few upcoming concerts
+* Browse to the site again and click *Upcoming*, it should now be showing a few upcoming concerts
   * This is because when you configured the connection string in the web app, it caused a restart of the application - at which point it automatically initializes the database with the right schema and a few sample concerts
 
 ![Web App Upcoming Concerts](images/webapp-page-upcomingconcerts.png)
@@ -157,18 +157,18 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
   * Copy the **Application ID** to Notepad
 * Go back to the Azure AD B2C **Applications** blade to create the necessary policies
 * Create a combined [sign-up or sign-in policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-sign-up-or-sign-in-policy)
-  * For the policy **Name**, use `SignUpOrIn`
+  * For the policy **Name**, use `SignUpOrIn`  
   * For the **Sign-up attributes**, select at least `Display Name` and `Email Address`
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * ![Add Sign Up Or In Sign Policy to Azure AD B2C](images/aadb2c-policy-signuporin.png)
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Create a [profile editing policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-profile-editing-policy)
-  * For the policy **Name**, use `EditProfile`
+  * For the policy **Name**, use `EditProfile`  
   * For the **Profile attributes**, select at least `Display Name` so the user can edit their name as it is displayed in the web application
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Create a [password reset policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-password-reset-policy)
-  * For the policy **Name**, use `ResetPassword`
+  * For the policy **Name**, use `ResetPassword`  
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Navigate to the App Service for the Web App and open the **Application settings** blade
@@ -179,8 +179,8 @@ Name | Value
 App:Authentication:Tenant | The full domain name of your Azure AD B2C tenant (including `.onmicrosoft.com`)
 App:Authentication:ClientId | The Client ID of the web app you registered
 App:Authentication:SignUpSignInPolicyId | The name of the sign-up or sign-in policy, e.g. `B2C_1_SignUpOrIn`
-App:Authentication:ResetPasswordPolicyId | The name of the password reset policy, e.g. `B2C_1_ResetPassword`
 App:Authentication:EditProfilePolicyId | The name of the profile editing policy, e.g. `B2C_1_EditProfile`
+App:Authentication:ResetPasswordPolicyId | The name of the password reset policy, e.g. `B2C_1_ResetPassword`
 
 * Browse to the site again, it should now allow you to register as a new user
   * Go through the sign in experience to register a new account using any email address (e.g. use a personal email to simulate an end user for your e-commerce application)
@@ -235,6 +235,7 @@ App:StorageAccount:EventQueueName | A name for the queue through which event mes
 * Build the `Relecloud.FunctionApp` project (e.g. in Visual Studio or on the command line) and ensure there are no errors
 * Use any of the supported ways to [deploy the project to an Azure Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-infrastructure-as-code)
   * Note that the easiest way if you are using Visual Studio 2017 or above is to [publish the project directly to Azure](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs#publish-to-azure)
+  * If the publish *Azure Function App* is missing from the publishing targets you might need to install update for the *Azure Functions and Web Job Tools* visual studio extension. You should see a notification flag in the upper right corner which will allow you to update the extension.
 * When creating the Function App:
   * _Suggested name for the App Service: `<prefix>-func-app`_
   * _Suggested name for the App Service Plan: `<prefix>-func-plan`_
