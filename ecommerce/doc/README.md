@@ -134,7 +134,7 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
 
 ![Configure Web App](images/webapp-settings-sqldatabase.png)
 
-* Browse to the site again and click *Upcoming*, it should now be showing a few upcoming concerts
+* Browse to the site again and click **Upcoming**, it should now be showing a few upcoming concerts
   * This is because when you configured the connection string in the web app, it caused a restart of the application - at which point it automatically initializes the database with the right schema and a few sample concerts
 
 ![Web App Upcoming Concerts](images/webapp-page-upcomingconcerts.png)
@@ -157,18 +157,18 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
   * Copy the **Application ID** to Notepad
 * Go back to the Azure AD B2C **Applications** blade to create the necessary policies
 * Create a combined [sign-up or sign-in policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-sign-up-or-sign-in-policy)
-  * For the policy **Name**, use `SignUpOrIn`  
+  * For the policy **Name**, use `SignUpOrIn`
   * For the **Sign-up attributes**, select at least `Display Name` and `Email Address`
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * ![Add Sign Up Or In Sign Policy to Azure AD B2C](images/aadb2c-policy-signuporin.png)
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Create a [profile editing policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-profile-editing-policy)
-  * For the policy **Name**, use `EditProfile`  
+  * For the policy **Name**, use `EditProfile`
   * For the **Profile attributes**, select at least `Display Name` so the user can edit their name as it is displayed in the web application
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Create a [password reset policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-password-reset-policy)
-  * For the policy **Name**, use `ResetPassword`  
+  * For the policy **Name**, use `ResetPassword`
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Navigate to the App Service for the Web App and open the **Application settings** blade
@@ -235,7 +235,7 @@ App:StorageAccount:EventQueueName | A name for the queue through which event mes
 * Build the `Relecloud.FunctionApp` project (e.g. in Visual Studio or on the command line) and ensure there are no errors
 * Use any of the supported ways to [deploy the project to an Azure Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-infrastructure-as-code)
   * Note that the easiest way if you are using Visual Studio 2017 or above is to [publish the project directly to Azure](https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs#publish-to-azure)
-  * If the publish *Azure Function App* is missing from the publishing targets you might need to install update for the *Azure Functions and Web Job Tools* visual studio extension. You should see a notification flag in the upper right corner which will allow you to update the extension.
+  * If the **Azure Function App** option is missing from the publishing targets you might need to install an update for the **Azure Functions and Web Job Tools** Visual Studio extension. You should see a notification flag in the upper right corner which will allow you to update the extension.
 * When creating the Function App:
   * _Suggested name for the App Service: `<prefix>-func-app`_
   * _Suggested name for the App Service Plan: `<prefix>-func-plan`_
