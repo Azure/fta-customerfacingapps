@@ -4,8 +4,8 @@ See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackFor
 
 # Customer Facing Apps Scenarios
 
-* Digital Marketing
-* [E-Commerce](ecommerce/doc/README.md)
+* [Digital Marketing](digital-marketing/articles/wordpress-on-azure-web-apps.md)
+* [E-Commerce](ecommerce/articles/README.md)
 
 # Contributing
 

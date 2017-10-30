@@ -72,12 +72,12 @@ To complete this scenario, you will need:
   * We will refer to this as `<region>` in the suggested names below
 * At the end your Resource Group may look something like this:
 
-![Resource Group Overview](images/resourcegroup-overview.png)
+![Resource Group Overview](media/resourcegroup-overview.png)
 
 #### Open the application with Visual Studio
 * Clone the repository or copy the project's [source code](../src) to a local working folder
 * From the working folder, open **Relecloud.sln** with Visual Studio
-* ![Visual Studio Solution](images/visualstudio-solution.png)
+* ![Visual Studio Solution](media/visualstudio-solution.png)
 * Explore the solution
   * The `Relecloud.Web` project contains the main e-commerce web application
     * This will be deployed as an Azure Web App
@@ -94,7 +94,7 @@ To complete this scenario, you will need:
 * Navigate to the [Azure Portal](https://portal.azure.com) and sign in with your account
 * [Create a Resource Group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-portal)
   * _Suggested name for the Resource Group: `<prefix>-prod-rg`_
-  * ![Create Resource Group](images/resourcegroup-create.png)
+  * ![Create Resource Group](media/resourcegroup-create.png)
 
 #### Deploy the Web App
 > This allows users to visit your e-commerce web application
@@ -108,11 +108,11 @@ To complete this scenario, you will need:
   * Ensure to create the App Service Plan in the Resource Group you created before
   * Ensure to create the App Service Plan in the same Azure region as the Resource Group
   * Choose `S1 Standard` or higher as the pricing tier for the App Service Plan (lower pricing tiers do not support Traffic Manager which we can use later on)
-  * ![Deploy Web App](images/webapp-deploy.png)
+  * ![Deploy Web App](media/webapp-deploy.png)
 * After the deployment is complete, browse to the site at `http://<your-site-name>.azurewebsites.net`
   * You should be able to navigate around the site but there will not be any concerts and signing in will not work
 
-![Web App Home Page](images/webapp-page-home.png)
+![Web App Home Page](media/webapp-page-home.png)
 
 #### Create the SQL Database containing the concerts
 > This allows the stateless web application to store persistent data in a managed database service
@@ -120,10 +120,10 @@ To complete this scenario, you will need:
 * Back in the Azure Portal, navigate to the Resource Group and [create a SQL Database](https://docs.microsoft.com/en-us/azure/sql-database/sql-database-get-started-portal)
   * _Suggested name for the SQL Database: `<prefix>-sql-database`_
   * Choose `Basic` or higher as the pricing tier for the SQL Database
-  * ![Create SQL Database](images/sqldatabase-create.png)
+  * ![Create SQL Database](media/sqldatabase-create.png)
   * _Suggested name for the SQL Server: `<prefix>-sql-server`_
   * Ensure to create the firewall rule that allows Azure services to access the server
-  * ![Create SQL Server](images/sqlserver-create.png)
+  * ![Create SQL Server](media/sqlserver-create.png)
 * After the SQL Database has been created, navigate to its **Connection strings** blade in the Azure Portal and copy the **ADO.NET connection string** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
   * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
@@ -132,19 +132,19 @@ Name | Value
 ---- | -----
 App:SqlDatabase:ConnectionString | The connection string you copied before (with the user name and password placeholders replaced with their actual values)
 
-![Configure Web App](images/webapp-settings-sqldatabase.png)
+![Configure Web App](media/webapp-settings-sqldatabase.png)
 
 * Browse to the site again and click **Upcoming**, it should now be showing a few upcoming concerts
   * This is because when you configured the connection string in the web app, it caused a restart of the application - at which point it automatically initializes the database with the right schema and a few sample concerts
 
-![Web App Upcoming Concerts](images/webapp-page-upcomingconcerts.png)
+![Web App Upcoming Concerts](media/webapp-page-upcomingconcerts.png)
 
 #### Enable user sign-in via Azure AD B2C
 > This allows new users to sign up for your e-commerce application and to manage their profiles
 
 * Go back to your Resource Group in the Azure Portal and [create a new Azure Active Directory B2C tenant](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-get-started)
   * Ensure to create a _new_ tenant, not to link an existing one
-  * ![Create Azure AD B2C](images/aadb2c-create.png)
+  * ![Create Azure AD B2C](media/aadb2c-create.png)
   * After the Azure AD B2C tenant is created, copy the full domain name from the **Overview** blade (e.g. `relecloudconcerts.onmicrosoft.com`) and paste it in Notepad for later
   * Please note, remember to do a full browser refresh to ensure you can see the new Azure AD tenant you created when you click on your profile in the top right hand corner
 * [Register the web application in the Azure AD B2C tenant](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-app-registration)
@@ -153,7 +153,7 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
   * For the **Reply URL**, use `https://<your-site-name>.azurewebsites.net/signin-oidc`
     * Note that this URL must be secure (i.e. it must use **https**)
     * Fortunately Azure App Service provides a valid SSL certificate for the `*.azurewebsites.net` domain out of the box
-  * ![Register Web App in Azure AD B2C](images/aadb2c-register-webapp.png)
+  * ![Register Web App in Azure AD B2C](media/aadb2c-register-webapp.png)
 * After the application is registered, open its **Properties** blade
   * Copy the **Application ID** to Notepad
 * Go back to the Azure AD B2C **Applications** blade to create the necessary policies
@@ -161,7 +161,7 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
   * For the policy **Name**, use `SignUpOrIn`
   * For the **Sign-up attributes**, select at least `Display Name` and `Email Address`
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
-  * ![Add Sign Up Or In Sign Policy to Azure AD B2C](images/aadb2c-policy-signuporin.png)
+  * ![Add Sign Up Or In Sign Policy to Azure AD B2C](media/aadb2c-policy-signuporin.png)
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Create a [profile editing policy](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-reference-policies#create-a-profile-editing-policy)
   * For the policy **Name**, use `EditProfile`
@@ -196,7 +196,7 @@ App:Authentication:ResetPasswordPolicyId | The name of the password reset policy
 * Go back to your Resource Group in the Azure Portal and [create a new Azure Search Service](https://docs.microsoft.com/en-us/azure/search/search-create-service-portal)
   * _Suggested name for the service name: `<prefix>-search`_
   * Choose `Basic` or higher as the pricing tier
-  * ![Create Azure Search](images/search-create.png)
+  * ![Create Azure Search](media/search-create.png)
   * After the Azure Search service has been created, navigate to the **Keys** blade and copy the **Primary admin key** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
   * Under **App settings**, add the following new configuration settings:
@@ -208,7 +208,7 @@ App:AzureSearch:AdminKey | The primary admin key you copied before
 
 * Browse to the site again; within a few minutes it should now allow you to search for concerts and highlight the matching text in the search results
 
-![Web App Search](images/webapp-page-search.png)
+![Web App Search](media/webapp-page-search.png)
 
 * Note that the configuration of the connection (the "[indexer](https://docs.microsoft.com/en-us/azure/search/search-howto-connecting-azure-sql-database-to-azure-search-using-indexers)") between the SQL Database (the "data source") and the Azure Search service (the "[index](https://docs.microsoft.com/en-us/azure/search/search-what-is-an-index)") is performed automatically by the application upon startup when configured with the settings you just added
 * Browse through the blade for the Azure Search service you just created in the portal
@@ -223,7 +223,7 @@ App:AzureSearch:AdminKey | The primary admin key you copied before
   * _Suggested name for the Storage Account: `<prefix>storage`_ (note that special characters are not allowed here)
   * The Queues service will be used to send an event to a background application whenever a user purchases a ticket
   * The Blobs service will be used to securely store the generated ticket images
-  * ![Create Storage Account](images/storage-create.png)
+  * ![Create Storage Account](media/storage-create.png)
   * After the Storage Account has been created, navigate to the **Access keys** blade and copy the **connection string** for **key1** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
   * Under **App settings**, add the following new configuration settings:
@@ -244,7 +244,7 @@ App:StorageAccount:EventQueueName | A name for the queue through which event mes
   * Ensure to create the App Service Plan in the same Azure region as the Resource Group
   * Choose `Consumption` as the pricing tier for the App Service Plan so you only pay when the function is effectively running (use another pricing tier if this is not supported in your chosen Azure region)
   * Choose the Storage Account you created before to store the required function app state
-  * ![Deploy Function App](images/functionapp-deploy.png)
+  * ![Deploy Function App](media/functionapp-deploy.png)
 * Navigate to the Function App in the Azure Portal and open the **Application settings** tab
   * Under **Application settings**, add the following new configuration settings:
 
@@ -254,14 +254,14 @@ App:StorageAccount:ConnectionString | The same as in the Web App
 App:StorageAccount:EventQueueName | The same as in the Web App
 App:SqlDatabase:ConnectionString | The same as in the Web App
 
-![Function App Settings](images/functionapp-settings-storage-sqldatabase.png)
+![Function App Settings](media/functionapp-settings-storage-sqldatabase.png)
 
 * Browse to the site again and purchase some tickets
   * At first, the tickets page should be showing a message that the ticket is still being generated
   * The ticket image will be generated in the background by the Function App (triggered by a message in a queue), stored into blob storage, at which point the ticket in the database will be updated with a URL to the image (secured by a [Shared Access Signature](https://docs.microsoft.com/en-us/azure/storage/common/storage-dotnet-shared-access-signature-part-1))
   * After a little while, a ticket image should appear when you refresh the tickets page
 
-![Web App Tickets](images/webapp-page-tickets.png)
+![Web App Tickets](media/webapp-page-tickets.png)
 
 ## Deployment Steps - Optional Services
 
@@ -271,7 +271,7 @@ App:SqlDatabase:ConnectionString | The same as in the Web App
 * Go back to your Resource Group in the Azure Portal and [create a new Redis Cache](https://docs.microsoft.com/en-us/azure/redis-cache/cache-dotnet-how-to-use-azure-redis-cache#create-cache)
   * _Suggested name for the DNS name: `<prefix>-redis`_
   * Choose `Basic C0` or higher as the pricing tier
-  * ![Create Redis Cache](images/redis-create.png)
+  * ![Create Redis Cache](media/redis-create.png)
   * After the Redis Cache has been created, navigate to the **Access keys** blade and copy the **Primary connection string (StackExchange.Redis)** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
   * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
@@ -287,7 +287,7 @@ App:RedisCache:ConnectionString | The connection string you copied before
 
 * Go back to your Resource Group in the Azure Portal and [create a new Application Insights resource](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-create-new-resource)
   * _Suggested name for the Application Insights resource: `<prefix>-appinsights`_
-  * ![Create Application Insights](images/appinsights-create.png)
+  * ![Create Application Insights](media/appinsights-create.png)
   * After the Application Insights resource has been created, navigate to the **Properties** blade and copy the **Instrumentation Key** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
   * Under **App settings**, add the following new configuration setting:
@@ -309,7 +309,7 @@ ApplicationInsights:InstrumentationKey | The instrumentation key you copied befo
   * _Suggested name for the Cognitive Services resource: `<prefix>-cognitiveservices`_
   * For the **API type**, choose **Text Analytics API**
   * For the **Pricing tier**, choose the `Free F0` if possible (there is a limit of one free account per subscription) or the `Standard S1` otherwise
-  * ![Create Cognitive Services](images/cognitiveservices-create.png)
+  * ![Create Cognitive Services](media/cognitiveservices-create.png)
 * After the Cognitive Service has been created
   * Open the **Overview** blade and copy the **Endpoint** URL to Notepad
   * Open the **Keys** blade and copy **Key 1** to Notepad
@@ -325,7 +325,7 @@ App:CognitiveServices:ApiKey | The key you copied before
   * The sentiment of the review will be analyzed in the background by the Function App (triggered by a message in a queue), at which point the review in the database will be updated with a score
   * After a little while, a sentiment score should appear for a review when you refresh the concert details page
 
-![Web App Concert Review](images/webapp-page-review.png)
+![Web App Concert Review](media/webapp-page-review.png)
 
 #### Prepare the web app for global availability using Traffic Manager
 > This allows you to prepare for global availability of your e-commerce site so that users always connect to the web app instance that is closest to their location
@@ -333,12 +333,12 @@ App:CognitiveServices:ApiKey | The key you copied before
 * Go back to your Resource Group in the Azure Portal and [create a new Traffic Manager profile](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-create-profile)
   * _Suggested name for the Traffic Manager profile: `<prefix>-traffic`_
   * For the **Routing method**, choose `Performance`
-  * ![Create Traffic Manager Profile](images/trafficmanager-create.png)
+  * ![Create Traffic Manager Profile](media/trafficmanager-create.png)
   * After the Traffic Manager profile has been created, open its **Endpoints** blade and [add an endpoint](https://docs.microsoft.com/en-us/azure/traffic-manager/traffic-manager-manage-endpoints#to-add-a-cloud-service-or-an-app-service-endpoint-to-a-traffic-manager-profile) pointing at the Web App
   * For the **Name**, choose the same name as the Web App, e.g. `<prefix>-web-app-<region>`
   * For the **Target resource type**, choose **App Service** and select the Web App
   * If you would add new Web App instances in other Azure regions later on, you can add them as endpoints here and they would get added to the Traffic Manager DNS name without any end user impact
-  * ![Add Traffic Manager Endpoint](images/trafficmanager-endpoint-add.png)
+  * ![Add Traffic Manager Endpoint](media/trafficmanager-endpoint-add.png)
 * Open the **Configuration** blade for the Traffic Manager profile and note that the **Routing method** is set to **Performance**
   * This means that the DNS name will resolve to the instance of the Web App that has the best performance for the user's location (usually the geographically closest region)
 * Now browse to the `http://<prefix>.trafficmanager.net` site
