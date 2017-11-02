@@ -32,7 +32,7 @@ Your digital marketing solution allows your organization to engage with customer
 * Select WordPress, click Create
 * Enter an **App name** (example: fasttrackdemo) for your WordPress site, it will validate to make sure the sub domain name is available under azurewebsites.net
 * Select your **Subscription**
-* For **Resource Group** Create new for this demo (example:fastttackdemo-test-rg)
+* For **Resource Group** click Create new for this demo (example:fastttackdemo-test-rg)
 * For **Database Provider** select **Azure Database for MySQL (Preview)** for this demo
 * Select **App Service Plan/Location**, click Create New, enter 
     * App Service Plan: **fastttackdemo-asp**
