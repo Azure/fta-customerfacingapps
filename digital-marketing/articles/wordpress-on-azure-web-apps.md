@@ -27,21 +27,21 @@ Your digital marketing solution allows your organization to engage with customer
 
 ## How to install WordPress on Azure Web Apps
 
-* Navigate to the Azure Portal
-* Click on + New, type WordPress in the search area, press Enter
-* Select WordPress, click Create
-* Enter an **App name** (example: fasttrackdemo) for your WordPress site, it will validate to make sure the sub domain name is available under azurewebsites.net
-* Select your **Subscription**
-* For **Resource Group** click Create new for this demo (example:fastttackdemo-test-rg)
-* For **Database Provider** select **Azure Database for MySQL (Preview)** for this demo
-* Select **App Service Plan/Location**, click Create New, enter 
+* Navigate to the Azure Portal.
+* Click on + New, type WordPress in the search area, press Enter.
+* Select WordPress, click Create.
+* Enter an **App name** (example: fasttrackdemo) for your WordPress site, it will validate to make sure the sub domain name is available under azurewebsites.net.
+* Select your **Subscription**.
+* For **Resource Group** click Create new for this demo (example:fastttackdemo-test-rg).
+* For **Database Provider** select **Azure Database for MySQL (Preview)** for this demo.
+* Select **App Service Plan/Location**, click Create New, enter:
     * App Service Plan: **fastttackdemo-asp**
     * Location: **West US**
     * Pricing tier: **S1 Standard**
-* Click **OK**
+* Click **OK**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-1.png)
-* Select Database, enter
+* Select Database, enter:
     * Server name: **fasttrackdemo-mysqldbserver**
     * Server admin login name: **your admin user name**
     * Password: **your strong password**
@@ -51,46 +51,46 @@ Your digital marketing solution allows your organization to engage with customer
         * Compute Units: **50**
         * Storage (GB): **50**
     * Database name: **fasttrackdemomysqldb**
-* Click **OK**
+* Click **OK**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-2.png)
 * Application Insights: **Off**
-* Click **Create**
+* Click **Create**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-3.png)
 
 ## Configuring WordPress on Azure Web Apps
 
-* Once the WordPress deployment has succeeded, from the left navigation bar in the portal, select **App Services**, then select **fasttrackdemo** web app, then click on the URL: http://fasttrackdemo.azurewebsites.net
+* Once the WordPress deployment has succeeded, from the left navigation bar in the portal, select **App Services**, then select **fasttrackdemo** web app, then click on the URL (e.g. http://fasttrackdemo.azurewebsites.net).
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-4.png)
 * This will take you to the initial configuration page (e.g. http://fasttrackdemo.azurewebsites.net/wp-admin/install.php). 
-* Select **English (United States)** and click **Continue**
+* Select **English (United States)** and click **Continue**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-5.png)
-* In the **Information needed** page, enter
+* In the **Information needed** page, enter:
     * Site Title: **FastTrack Demo**
     * Username: **your user name**
     * Password: **your strong password**
     * Your Email: **your email address**
-* Click on **Install WordPress**
+* Click on **Install WordPress**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-6.png)
-* If all goes well you should see a **Success!** page
+* If all goes well you should see a **Success!** page.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-7.png)
-* Click **Login**. Login with the Username and Password provided in the previous step
-* This will take you to Dashboard page
+* Click **Login**. Login with the Username and Password provided in the previous step.
+* This will take you to Dashboard page.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-8.png)
-* To change **Themes**, select **Appearance** then **Themes**. Select **Twenty Sixteen** then click **Activate**
+* To change **Themes**, select **Appearance** then **Themes**. Select **Twenty Sixteen** then click **Activate**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-9.png)
-* Now visit the site, by selecting **Visit Site** option from top left corner. This will take you to: http://fasttrackdemo.azurewebsites.net/ 
+* Now visit the site, by selecting **Visit Site** option from top left corner. This will take you to your website (e.g. http://fasttrackdemo.azurewebsites.net/).
 * Your WordPress site should look like this:
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-10.png)
-* Before we add any Posts & Pages, lets configure WordPress with some best practices
+* Before we add any Posts & Pages, lets configure WordPress with some best practices.
 
 ## Best Practices for running WordPress on Azure Web Apps
 
