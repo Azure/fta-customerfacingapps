@@ -50,7 +50,7 @@ Your digital marketing solution allows your organization to engage with customer
     * Pricing Tier: **Basic**
         * Compute Units: **50**
         * Storage (GB): **50**
-    * Database name: **fasttrackdemo-db**
+    * Database name: **fasttrackdemomysqldb**
 * Click **OK**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-2.png)
@@ -64,9 +64,8 @@ Your digital marketing solution allows your organization to engage with customer
 * Once the WordPress deployment has succeeded, from the left navigation bar in the portal, select **App Services**, then select **fasttrackdemo** web app, then click on the URL: http://fasttrackdemo.azurewebsites.net
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-4.png)
-* This will take you to the initial configuration page: http://fasttrackdemo.azurewebsites.net/wp-admin/install.php. 
-* Select **English (United States)** 
-* click **Continue**
+* This will take you to the initial configuration page (e.g. http://fasttrackdemo.azurewebsites.net/wp-admin/install.php). 
+* Select **English (United States)** and click **Continue**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-5.png)
 * In the **Information needed** page, enter
@@ -80,7 +79,7 @@ Your digital marketing solution allows your organization to engage with customer
 * If all goes well you should see a **Success!** page
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-7.png)
-* Click **Login**. Login with the Username & Password provided in the previous step
+* Click **Login**. Login with the Username and Password provided in the previous step
 * This will take you to Dashboard page
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-8.png)
