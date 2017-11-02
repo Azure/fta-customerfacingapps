@@ -108,9 +108,9 @@ To disable the ARR cookie:
 * Click **Save** on the top.
 
 ### **Azure Blob storage for Media Content**
-> If your WordPress site consists of a lot of video and image content, we recommend using blob storage to store all your media content. To learn how to create an Azure storage account, see [How to create an Azure storage account](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account). Once you have created the account, activate and configure [Windows Azure Storage for WordPress plugin](https://wordpress.org/plugins/windows-azure-storage/) for your WordPress website.
+> If your WordPress site consists of a lot of video and image content, we recommend using blob storage to store all your media content. To learn how to create an Azure storage account, see [How to create an Azure storage account](hhttps://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account). Once you have created the account, activate and configure [Windows Azure Storage for WordPress plugin](https://wordpress.org/plugins/windows-azure-storage/) for your WordPress website.
 
-* Make sure to [Create a storage account and a blob container](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account) first before proceeding to next step. Remark: when creating the container make sure you set the **access level** to **Container** so that users visiting the WordPress site can see the actual media content.
+* Make sure to [Create a storage account and a blob container](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account) first before proceeding to next step. Remark: when creating the container make sure you set the **access level** to **Container** so that users visiting the WordPress site can see the actual media content.
 * Once the storage account is created, go to the WordPress site Dashboard page. For example: (http://fasttrackdemo.azurewebsites.net/wp-admin/)
 * Click on **Plugins**, then **Add New**
 * In the **Search plugins**, enter **Windows Azure Storage for WordPress**
