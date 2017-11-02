@@ -50,7 +50,8 @@ Your digital marketing solution allows your organization to engage with customer
     * Pricing Tier: **Basic**
         * Compute Units: **50**
         * Storage (GB): **50**
-* **OK**
+    * Database name: **fasttrackdemo-db**
+* Click **OK**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-2.png)
 * Application Insights: **Off**
