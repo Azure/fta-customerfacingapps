@@ -32,10 +32,10 @@ Your digital marketing solution allows your organization to engage with customer
 * Select WordPress, click Create.
 * Enter an **App name** (example: fasttrackdemo) for your WordPress site, it will validate to make sure the sub domain name is available under azurewebsites.net.
 * Select your **Subscription**.
-* For **Resource Group** click Create new for this demo (example:fastttackdemo-test-rg).
+* For **Resource Group** click Create new for this demo (example:fasttrackdemo-test-rg).
 * For **Database Provider** select **Azure Database for MySQL (Preview)** for this demo.
 * Select **App Service Plan/Location**, click Create New, enter:
-    * App Service Plan: **fastttackdemo-asp**
+    * App Service Plan: **fasttrackdemo-asp**
     * Location: **West US**
     * Pricing tier: **S1 Standard**
 * Click **OK**.
@@ -108,20 +108,20 @@ To disable the ARR cookie:
 * Click **Save** on the top.
 
 ### **Azure Blob storage for Media Content**
-> If your WordPress site consists of a lot of video and image content, we recommend using blob storage to store all your media content. To learn how to create an Azure storage account, see [How to create an Azure storage account](hhttps://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account). Once you have created the account, activate and configure [Windows Azure Storage for WordPress plugin](https://wordpress.org/plugins/windows-azure-storage/) for your WordPress website.
+> If your WordPress site consists of a lot of video and image content, we recommend using blob storage to store all your media content. To learn how to create an Azure storage account, see [How to create an Azure storage account](hhttps://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account). Once you have created the account, activate and configure [Microsoft Azure Storage for WordPress plugin](https://wordpress.org/plugins/windows-azure-storage/) for your WordPress website.
 
 * Make sure to [Create a storage account and a blob container](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account) first before proceeding to next step. Remark: when creating the container make sure you set the **access level** to **Container** so that users visiting the WordPress site can see the actual media content.
 * Once the storage account is created, go to the WordPress site Dashboard page. For example: (http://fasttrackdemo.azurewebsites.net/wp-admin/)
 * Click on **Plugins**, then **Add New**
-* In the **Search plugins**, enter **Windows Azure Storage for WordPress**
+* In the **Search plugins**, enter **Microsoft Azure Storage for WordPress**
 * Click **Install Now**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-12.png)
 * Once successfully installed, Click **Activate**
-* From the WordPress Dashboard page, go to **Settings**, click **Windows Azure**, enter the following:
+* From the WordPress Dashboard page, go to **Settings**, click **Microsoft Azure**, enter the following:
     * Store Account Name: **your storage account name**
     * Store Account Key: **one of the storage access keys**
-    * Use Windows Azure Storage for default upload: **check this box**
+    * Use Microsoft Azure Storage for default upload: **check this box**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-13.png)
 * Click **Save Changes**
@@ -133,7 +133,7 @@ To disable the ARR cookie:
  
  * Create Azure [Redis cache from Azure portal](http://azure.microsoft.com/en-us/services/cache/)
 
-    ![Screenshot](media/wordpress-on-azure-web-apps/wp-14.png)
+    ![Screenshot](media/wordpress-on-azure-web-apps/wp-14b.png)
 * After successfully creating Redis cache, note down the **Host Name** & **Primary Access Key**. We will use these values in the following step
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-16.png)
@@ -160,14 +160,14 @@ To disable the ARR cookie:
     
     ```
     /* Redis Cache */
-    define('WP_REDIS_SCHEME', 'tcp');
+    define('WP_REDIS_SCHEME', 'tls');
     define('WP_REDIS_HOST', '<your redis account name>.redis.cache.windows.net');
-    define('WP_REDIS_PORT', '6379');
+    define('WP_REDIS_PORT', '6380');
     define('WP_REDIS_DATABASE', '0');
     define('WP_REDIS_PASSWORD', '<your primary access key>');
     ```
 
-  ![Screenshot](media/wordpress-on-azure-web-apps/wp-20.png)
+  ![Screenshot](media/wordpress-on-azure-web-apps/wp-20b.png)
     * Click **Save** on the top
     
 * Verify the **Redis Cache** is connected
@@ -175,7 +175,7 @@ To disable the ARR cookie:
     * Click on **Settings**, then **Redis**
     * Click **Enable Object Cache**
     * Status should be: **Connected**
-    ![Screenshot](media/wordpress-on-azure-web-apps/wp-21.png)
+    ![Screenshot](media/wordpress-on-azure-web-apps/wp-21b.png)
         
 * **Other Performance Best practices**: There are only few best practices mentioned above to give you an idea on how to get started. You can find additional best practices using the following resources, keep in mind you may not need all the best practices, select best practices based on your need:
 
@@ -184,13 +184,13 @@ To disable the ARR cookie:
     * [How to speed up your WordPress site on Azure App Service](https://azure.microsoft.com/en-us/blog/10-ways-to-speed-up-your-wordpress-site-on-azure-websites/)    
 
 ### **Configure CDN for WordPress to improve performance**
-Azure CDN can increase the performance and stability of your wordpress blog by caching static content on [edge servers](https://docs.microsoft.com/en-us/azure/cdn/cdn-pop-locations) closer to users. Please see the [Azure CDN Overview](https://docs.microsoft.com/en-us/azure/cdn/cdn-overview) for more details.  
+Azure CDN can increase the performance and stability of your WordPress blog by caching static content on [edge servers](https://docs.microsoft.com/en-us/azure/cdn/cdn-pop-locations) closer to users. Please see the [Azure CDN Overview](https://docs.microsoft.com/en-us/azure/cdn/cdn-overview) for more details.  
 
-To configure CDN in wordpress, follow these steps:
+To configure CDN in WordPress, follow these steps:
  1.  [Create an Azure CDN profile](https://docs.microsoft.com/en-us/azure/cdn/cdn-create-new-endpoint) 
  2. [Map a custom domain](https://docs.microsoft.com/en-us/azure/cdn/cdn-map-content-to-custom-domain) such as *cdn.my-company-blog.com* to your CDN profile
  3. Install a CDN plugin 
- 4. Configure your CDN plugin to use the custom CDN domain for cached content. Two popular plugins available in the Wordpress plugin repository are [WP Super Cache](https://wordpress.org/plugins/wp-super-cache) and [CDN Enabler](https://wordpress.org/plugins/cdn-enabler).
+ 4. Configure your CDN plugin to use the custom CDN domain for cached content. Two popular plugins available in the WordPress plugin repository are [WP Super Cache](https://wordpress.org/plugins/wp-super-cache) and [CDN Enabler](https://wordpress.org/plugins/cdn-enabler).
 
  WP Super Cache Configuration:
  ![Wp Super Cache](media/wordpress-on-azure-web-apps/wpsupercachecdn.png)
@@ -232,7 +232,7 @@ Simply zip your WordPress site content from on-premises. For example if your Wor
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-26.png)
 
 ### Importing the MySQL database
-* Now export your MySQL database. You can use tools like phpMyAdmin (web interface) or MySQL WorkBench. For example: phpMyAdmin is offered as an Azure Web App site **Extension**. You can install this and use it to export your MySQL db
+* Now export your MySQL database. You can use tools like phpMyAdmin (web interface) or MySQL WorkBench. For example: phpMyAdmin is offered as an Azure Web App site **Extension**. It comes preinstalled if you created the WordPress site from the gallery as explained in the beginning, otherwise you can install it and use it to export your MySQL database.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-27.png)
 * Next step: import your MySQL database. Again you can use tools like phpMyAdmin (web interface) or MySQL WorkBench. From phpMyAdmin, go to the Import tab, select the MySQL file you exported in the previous step and click Go.
@@ -267,7 +267,7 @@ There are two ways to update the database connection string:
     * Edit **wp-config.php**
         ![Screenshot](media/wordpress-on-azure-web-apps/wp-19.png) 
     
-    * Change the following values: **DB_NAME, DB_USER, DB_PASSWORD, DB_HOST** with MySQL on IaaS VM values. **Important**: as you can see these values are read from Web App's App Settings Connection string instead of being hard coded here. So its recommended to update the App settings. So follow the next method.
+    * Change the following values: **DB_NAME, DB_USER, DB_PASSWORD, DB_HOST** with MySQL on IaaS VM values. **Important**: as you can see, by default these values are read from Web App's App Settings Connection String instead of being hard coded here. So it's recommended to update the App Settings Connection String instead.
         ![Screenshot](media/wordpress-on-azure-web-apps/wp-30.png)  
 
 ## Adding a Custom Domain
@@ -281,13 +281,13 @@ Updating the WordPress site to resolve to the new domain can be done in 2 ways:
   1. Using WordPress dashboard. Update **Settings > General > WordPress Address (URL) & Site Address (URL)**. This might be greyed out and may not allow you to update for multiple reasons (example: updating wp-config.php).
 
         ![Screenshot](media/wordpress-on-azure-web-apps/wp-32.png)
-  2. Update the database using **phpMyAdmin** extension.  
+  2. Update the database directly using the **phpMyAdmin** extension.  
 
-        * First Install **phpMyAdmin** extension, by going to **WebApp > Extensions > Add phpMyAdmin**
+        * First install the **phpMyAdmin** extension if it's not yet installed, by going to **WebApp > Extensions > Add phpMyAdmin**
 
             ![Screenshot](media/wordpress-on-azure-web-apps/wp-33.png)
-        * Once you install **phpMyAdmin** extension, Browse to it. It should take you to phpMyAdmin web interface (for example: https://fasttrackdemo.scm.azurewebsites.net/phpmyadmin/)
-        * Expand you MySQL database from left tree and open up **wp-options** table and update two records (Column: **option_value**) where **option_name = siteurl & home**. This value should be your custom domain.
+        * Once you install **phpMyAdmin** extension, browse to it. It should take you to the phpMyAdmin web interface (for example: https://fasttrackdemo.scm.azurewebsites.net/phpmyadmin/)
+        * Expand your MySQL database from the left tree, open up the **wp-options** table and update two records (Column: **option_value**) where **option_name = siteurl & home**. This value should be your custom domain.
 
             ![Screenshot](media/wordpress-on-azure-web-apps/wp-34.png).
 
