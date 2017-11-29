@@ -5,7 +5,7 @@ See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackFor
 # Customer Facing Apps Scenarios
 
 * [Digital Marketing](digital-marketing/)
-* [E-Commerce](ecommerce/articles/README.md)
+* [E-Commerce](ecommerce/)
 
 # Contributing
 
