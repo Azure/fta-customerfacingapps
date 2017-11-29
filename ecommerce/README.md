@@ -1,4 +1,4 @@
-###### [FastTrack for Azure landing page](https://github.com/Azure/FastTrackForAzure) | [Customer Facing Apps](https://github.com/Azure/fta-customerfacingapps)
+###### [FastTrack for Azure landing page](https://github.com/Azure/FastTrackForAzure)
 
 
 
