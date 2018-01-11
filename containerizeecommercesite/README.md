@@ -2,6 +2,6 @@
 
 
 
-# Containerized E-commerce site
+# Containerized E-Commerce Site
 
 
