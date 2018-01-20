@@ -4,4 +4,4 @@
 
 # Containerized E-Commerce Site
 
-* [POC Scenario: Containerize a .NET Core E-commerce Website](articles/contoso-finance.md)
+* [POC Scenario: Containerize a .NET Core E-commerce Website](article/contoso-finance.md)
