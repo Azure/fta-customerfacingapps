@@ -1,0 +1,82 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: contoso-finance-api
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: contoso-finance-api
+    spec:
+      containers:
+      - name: contoso-finance-api
+        image: kpantos/contoso.financial.core.api
+        ports:
+        - containerPort: 80
+        env:
+        - name: TransactionDb
+          value: "Server=tcp:contosofinancedbserver1.database.windows.net,1433;Initial Catalog=contosofinancedb;Persist Security Info=False;User ID={your username};Password={your password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contoso-finance-api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: contoso-finance-api
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: contoso-finance-web
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: contoso-finance-web
+    spec:
+      containers:
+      - name: contoso-finance-web
+        image: kpantos/contoso.financial.core.website
+        ports:
+        - containerPort: 80
+        env:
+        - name: IdentityConnection
+          value: "Server=tcp:contosofinancedbserver1.database.windows.net,1433;Initial Catalog=contosofinancedb;Persist Security Info=False;User ID={your username};Password={your password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+          name: APIServer
+          value: "contoso-finance-api"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: contoso-finance-web
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: contoso-finance-web
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: contoso-finance-background
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: contoso-finance-background
+    spec:
+      containers:
+      - name: contoso-finance-background
+        image: kpantos/contoso.financial.core.background
+        env:
+        - name: TransactionDb
+          value: "Server=tcp:contosofinancedbserver1.database.windows.net,1433;Initial Catalog=contosofinancedb;Persist Security Info=False;User ID={your username};Password={your password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+---
