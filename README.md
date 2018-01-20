@@ -7,7 +7,6 @@ See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackFor
 * [Digital Marketing](digital-marketing/)
 * [E-Commerce](ecommerce/)
 * [Containerize an E-Commerce Site](containerizeecommercesite/)
-* [Node.js in a Container](containerizenodejssite/)
 
 # Contributing
 
