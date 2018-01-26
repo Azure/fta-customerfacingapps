@@ -34,11 +34,12 @@ Azure Platform-as-a-Service (PaaS) enables you to deploy enterprise grade e-comm
 
 During this guided Proof-Of-Concept (POC) scenario, you will learn about bringing together various Azure PaaS components to deploy a sample e-commerce application, _Relecloud Concerts_, an online concert ticketing platform.
 
+![Scenario Overview](media/scenario-overview.png)
+
 #### Learning objectives
 * Understanding the Azure App Service platform and building Web Apps with SQL Database
 * Implementing search, user sign-up, background task processing, and caching
 * Gaining insights into application and user behavior with Application Insights
-* Implementing continuous integration and continuous deployment workflows for your application 
 
 ## Preparation
 
@@ -52,6 +53,7 @@ To complete this scenario, you will need:
 * As part of this scenario, you will be deploying the following resources into a Resource Group:
   * App Service
   * Function App
+  * Azure Active Directory B2C
   * Application Insights
   * Redis Cache
   * Search Service
