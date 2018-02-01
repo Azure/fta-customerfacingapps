@@ -272,7 +272,7 @@ App:SqlDatabase:ConnectionString | The same as in the Web App
 
 * Go back to your Resource Group in the Azure Portal and [create a new Redis Cache](https://docs.microsoft.com/en-us/azure/redis-cache/cache-dotnet-how-to-use-azure-redis-cache#create-cache)
   * _Suggested name for the DNS name: `<prefix>-redis`_
-  * Choose `Basic C0` or higher as the pricing tier
+  * Choose `Basic C1` or higher as the pricing tier (`C0` is not preferred since it uses shared CPU cores)
   * ![Create Redis Cache](media/redis-create.png)
   * After the Redis Cache has been created, navigate to the **Access keys** blade and copy the **Primary connection string (StackExchange.Redis)** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
