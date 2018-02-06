@@ -191,6 +191,7 @@ App:Authentication:ResetPasswordPolicyId | The name of the password reset policy
   * When signing in again later, also notice that there is a possibility to reset your password in case you forgot it (i.e. the password reset policy)
   * Important to note is that **no user credentials are ever stored or managed in the application database**: the complete identity management experience is handled and secured by Azure AD B2C
   * Also note that it is possible to completely [customize the user experience presented by Azure AD B2C](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-ui-customization-custom) (e.g. to use custom branding images or a completely new look to match the style of your web application)
+  * Finally, you can also configure Azure AD B2C to allow users to sign in with existing social identities such as their [Microsoft Account](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-setup-msa-app), [Facebook](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-setup-fb-app), [Google](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-setup-goog-app), etc
 
 #### Set up Azure Search connected to the SQL Database
 > This allows your users to perform powerful searches for the concerts in the database with hit highlighting
@@ -369,9 +370,6 @@ As an alternative to manually setting up all the necessary resources in Azure an
   * Using [Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-manager-vscode-extension)
   * ...
 * After the various resources have been created, you only have to publish the `Relecloud.Web` project to the Azure Web App, and the `Relecloud.FunctionApp` project to the Azure Function App as explained above (the app settings for both are automatically populated)
-
-#### Add social logins
-> Allow users to sign in using their existing Microsoft, Facebook, Google, ... account
 
 #### Improve the search experience
 > Add faceting, filtering, scoring functions, ...
