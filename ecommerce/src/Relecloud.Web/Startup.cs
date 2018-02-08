@@ -14,6 +14,7 @@ using Relecloud.Web.Services.AzureSearchService;
 using Relecloud.Web.Services.DummyServices;
 using Relecloud.Web.Services.SqlDatabaseEventRepository;
 using Relecloud.Web.Services.StorageAccountEventSenderService;
+using System;
 
 namespace Relecloud.Web
 {
@@ -47,6 +48,12 @@ namespace Relecloud.Web
             var storageAccountConnectionString = Configuration.GetValue<string>("App:StorageAccount:ConnectionString");
             var storageAccountEventQueueName = Configuration.GetValue<string>("App:StorageAccount:EventQueueName");
             var authenticationConfigurationSection = Configuration.GetSection("App:Authentication");
+            var cdnUrlString = Configuration.GetValue<string>("App:Cdn:Url");
+            var cdnUrl = default(Uri);
+            if (Uri.TryCreate(cdnUrlString, UriKind.Absolute, out cdnUrl))
+            {
+                ExtensionMethods.CdnUrl = cdnUrl;
+            }
 
             // Add custom services.
             if (!string.IsNullOrWhiteSpace(redisCacheConnectionString))

@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using System;
 using System.Security.Claims;
 
 namespace Relecloud.Web.Infrastructure
 {
     public static class ExtensionMethods
     {
+        public static Uri CdnUrl { get; set; }
+
         public static string GetUniqueId(this ClaimsPrincipal user)
         {
             // Azure AD issues a globally unique user ID in the objectidentifier claim.
@@ -21,6 +25,16 @@ namespace Relecloud.Web.Infrastructure
         {
             var value = session.GetString(key);
             return value == null ? default(T) : JsonConvert.DeserializeObject<T>(value);
+        }
+
+        public static string CdnContent(this IUrlHelper url, string contentPath)
+        {
+            var path = url.Content(contentPath);
+            if (CdnUrl != null)
+            {
+                return new Uri(CdnUrl, path).ToString();
+            }
+            return path;
         }
     }
 }
