@@ -22,10 +22,6 @@
   * [Add sentiment analysis for reviews using Cognitive Services](#add-sentiment-analysis-for-reviews-using-cognitive-services)
   * [Prepare the web app for global availability using Traffic Manager](#prepare-the-web-app-for-global-availability-using-traffic-manager)
 * [Next Steps](#next-steps)
-  * [Deploy using an ARM Template](#deploy-using-an-arm-template)
-  * [Add social logins](#add-social-logins)
-  * [Improve the search experience](#improve-the-search-experience)
-  * [Add multiple web app instances](#add-multiple-web-app-instances)
 
 ## Introduction
 
@@ -128,7 +124,7 @@ To complete this scenario, you will need:
   * ![Create SQL Server](media/sqlserver-create.png)
 * After the SQL Database has been created, navigate to its **Connection strings** blade in the Azure Portal and copy the **ADO.NET connection string** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
+  * Under **Application settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
 
 Name | Value
 ---- | -----
@@ -175,7 +171,7 @@ App:SqlDatabase:ConnectionString | The connection string you copied before (with
   * For the **Application claims**, select at least `Display Name`, `Email Addresses` and `User's Object ID`
   * After the policy is created, copy its full name to Notepad (including the `B2C_1_` prefix that is automatically appended)
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings**, add the following new configuration settings from the values in Notepad:
+  * Under **Application settings**, add the following new configuration settings from the values in Notepad:
 
 Name | Value
 ---- | -----
@@ -202,7 +198,7 @@ App:Authentication:ResetPasswordPolicyId | The name of the password reset policy
   * ![Create Azure Search](media/search-create.png)
   * After the Azure Search service has been created, navigate to the **Keys** blade and copy the **Primary admin key** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings**, add the following new configuration settings:
+  * Under **Application settings**, add the following new configuration settings:
 
 Name | Value
 ---- | -----
@@ -229,7 +225,7 @@ App:AzureSearch:AdminKey | The primary admin key you copied before
   * ![Create Storage Account](media/storage-create.png)
   * After the Storage Account has been created, navigate to the **Access keys** blade and copy the **connection string** for **key1** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings**, add the following new configuration settings:
+  * Under **Application settings**, add the following new configuration settings:
 
 Name | Value
 ---- | -----
@@ -277,7 +273,7 @@ App:SqlDatabase:ConnectionString | The same as in the Web App
   * ![Create Redis Cache](media/redis-create.png)
   * After the Redis Cache has been created, navigate to the **Access keys** blade and copy the **Primary connection string (StackExchange.Redis)** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
+  * Under **Application settings** (note: _do not_ use **Connection strings**), add a new configuration setting:
 
 Name | Value
 ---- | -----
@@ -293,7 +289,7 @@ App:RedisCache:ConnectionString | The connection string you copied before
   * ![Create Application Insights](media/appinsights-create.png)
   * After the Application Insights resource has been created, navigate to the **Properties** blade and copy the **Instrumentation Key** to the clipboard
 * Navigate to the App Service for the Web App and open the **Application settings** blade
-  * Under **App settings**, add the following new configuration setting:
+  * Under **Application settings**, add the following new configuration setting:
 
 Name | Value
 ---- | -----
@@ -304,6 +300,26 @@ ApplicationInsights:InstrumentationKey | The instrumentation key you copied befo
 * Go to the **Overview** blade of your Application Insights resource and open the **Search** blade
   * This allows you to see incoming data in near real time
 * [Learn more about Application Insights](https://docs.microsoft.com/en-us/azure/application-insights/app-insights-overview) to understand what else you can do with this very powerful service
+
+#### Use a Content Delivery Network for static files
+> This speeds up the performance of your e-commerce site for your end users
+
+* Go back to your Resource Group in the Azure Portal and [create a new CDN Profile](https://docs.microsoft.com/en-us/azure/cdn/cdn-create-new-endpoint)
+  * _Suggested name for the CDN Profile: `<prefix>-cdn`_
+  * _Suggested name for the CDN Endpoint: `<prefix>`_
+  * For this scenario, consider using the `Standard Akamai` pricing tier, as Akamai has a shorter propagation time than Verizon (so you will see the content being served typically within the minute already)
+  * When creating the CDN Profile, also create an Endpoint for the Web App immediately
+  * ![Create CDN Profile](media/cdnprofile-create.png)
+  * After the CDN Endpoint has been created, navigate to its **Overview** blade and copy the **Endpoint hostname** (e.g. `https://<prefix>.azureedge.net`) to the clipboard
+* Navigate to the App Service for the Web App and open the **Application settings** blade
+  * Under **Application settings**, add the following new configuration setting:
+
+Name | Value
+---- | -----
+App:Cdn:Url | The CDN endpoint URL you copied before
+
+* Browse to the site again and look at the source for the home page
+  * The image as well as the site-specific CSS and JavaScript files should now be served from the CDN
 
 #### Add sentiment analysis for reviews using Cognitive Services
 > This allows you to determine whether the sentiment of a user review is positive or negative
@@ -370,9 +386,3 @@ As an alternative to manually setting up all the necessary resources in Azure an
   * Using [Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-manager-vscode-extension)
   * ...
 * After the various resources have been created, you only have to publish the `Relecloud.Web` project to the Azure Web App, and the `Relecloud.FunctionApp` project to the Azure Function App as explained above (the app settings for both are automatically populated)
-
-#### Improve the search experience
-> Add faceting, filtering, scoring functions, ...
-
-#### Add multiple web app instances
-> Add them to the Traffic Manager profile, set a custom DNS name pointing at the Traffic Manager profile (with a custom SSL certificate)
