@@ -19,6 +19,7 @@
 * [Deployment Steps - Optional Services](#deployment-steps---optional-services)
   * [Add caching of upcoming concerts using Redis Cache](#add-caching-of-upcoming-concerts-using-redis-cache)
   * [Set up monitoring and analytics using Application Insights](#set-up-monitoring-and-analytics-using-application-insights)
+  * [Use a Content Delivery Network for static files](#use-a-content-delivery-network-for-static-files)
   * [Add sentiment analysis for reviews using Cognitive Services](#add-sentiment-analysis-for-reviews-using-cognitive-services)
   * [Prepare the web app for global availability using Traffic Manager](#prepare-the-web-app-for-global-availability-using-traffic-manager)
 * [Next Steps](#next-steps)
@@ -316,7 +317,7 @@ ApplicationInsights:InstrumentationKey | The instrumentation key you copied befo
 
 Name | Value
 ---- | -----
-App:Cdn:Url | The CDN endpoint URL you copied before
+App:Cdn:Url | The CDN Endpoint URL you copied before
 
 * Browse to the site again and look at the source for the home page
   * The image as well as the site-specific CSS and JavaScript files should now be served from the CDN
