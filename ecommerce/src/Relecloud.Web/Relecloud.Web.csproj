@@ -9,8 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Properties\PublishProfiles\relecloud-web-app-we - Web Deploy.pubxml" />
-    <None Remove="Properties\PublishProfiles\relecloudconcerts-web-app-we - Web Deploy.pubxml" />
   </ItemGroup>
 
   <ItemGroup>

@@ -103,6 +103,8 @@ namespace Relecloud.Web
             // they are all properly initialized upon construction.
             services.AddScoped<ApplicationInitializer, ApplicationInitializer>();
 
+            // Add support for session state.
+            // NOTE: If there is a distibuted cache service (e.g. Redis) then this will be used to store session data.
             services.AddSession();
         }
 

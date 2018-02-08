@@ -175,7 +175,7 @@
     "storageAccountName": "[concat(toLower(parameters('resourcePrefix')), 'storage')]",
     "searchServiceName": "[concat(parameters('resourcePrefix'), '-search')]",
     "searchServiceHostingMode": "Default",
-    "functionAppName": "[concat(parameters('resourcePrefix'), '-functions')]",
+    "functionAppName": "[concat(parameters('resourcePrefix'), '-func-app')]",
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "trafficManagerDnsName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "eventQueueName": "events",
