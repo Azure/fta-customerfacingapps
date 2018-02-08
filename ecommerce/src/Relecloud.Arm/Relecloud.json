@@ -93,7 +93,7 @@
         5,
         6
       ],
-      "defaultValue": 0
+      "defaultValue": 1
     },
     "storageAccountType": {
       "type": "string",
@@ -160,6 +160,15 @@
         "S4"
       ],
       "defaultValue": "S1"
+    },
+    "cdnSkuName": {
+      "type": "string",
+      "allowedValues": [
+        "standard_akamai",
+        "standard_verizon",
+        "premium_verizon"
+      ],
+      "defaultValue": "standard_akamai"
     }
   },
   "variables": {
@@ -179,7 +188,9 @@
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "trafficManagerDnsName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "eventQueueName": "events",
-    "cognitiveServicesAccountName": "[concat(parameters('resourcePrefix'), '-cognitiveservices')]"
+    "cognitiveServicesAccountName": "[concat(parameters('resourcePrefix'), '-cognitiveservices')]",
+    "cdnProfileName": "[concat(parameters('resourcePrefix'), '-cdn')]",
+    "cdnEndpointName": "[parameters('resourcePrefix')]"
   },
   "resources": [
     {
@@ -304,7 +315,8 @@
             "App:Authentication:SignUpSignInPolicyId": "[parameters('aadb2cSignUpSignInPolicyId')]",
             "App:Authentication:ResetPasswordPolicyId": "[parameters('aadb2cResetPasswordPolicyId')]",
             "App:Authentication:EditProfilePolicyId": "[parameters('aadb2cEditProfilePolicyId')]",
-            "ApplicationInsights:InstrumentationKey": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]"
+            "ApplicationInsights:InstrumentationKey": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
+            "App:Cdn:Url": "[concat('https://', variables('cdnEndpointName'), '.azureedge.net')]"
           }
         }
       ]
@@ -671,6 +683,50 @@
       "properties": {},
       "tags": {
         "displayName": "CognitiveServices"
+      }
+    },
+    {
+      "apiVersion": "2017-10-12",
+      "type": "microsoft.cdn/profiles",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[variables('cdnProfileName')]",
+      "sku": {
+        "name": "[parameters('cdnSkuName')]"
+      },
+      "properties": {
+      },
+      "tags": {
+        "displayName": "CdnProfile"
+      }
+    },
+    {
+      "apiVersion": "2017-10-12",
+      "dependsOn": [
+        "[concat('Microsoft.Cdn/profiles/', variables('cdnProfileName'))]"
+      ],
+      "name": "[concat(variables('cdnProfileName'), '/', variables('cdnEndpointName'))]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "isHttpAllowed": true,
+        "isHttpsAllowed": true,
+        "originHostHeader": "[reference(resourceId('Microsoft.Web/sites/', variables('webSiteName'))).defaultHostName]",
+        "origins": [
+          {
+            "name": "[variables('webSiteName')]",
+            "properties": {
+              "hostName": "[reference(resourceId('Microsoft.Web/sites/', variables('webSiteName'))).defaultHostName]",
+              "httpPort": 80,
+              "httpsPort": 443
+            }
+          }
+        ]
+      },
+      "type": "microsoft.cdn/profiles/endpoints",
+      "tags": {
+        "displayName": "CdnEndpoint"
       }
     }
   ]
