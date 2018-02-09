@@ -366,10 +366,13 @@ App:CognitiveServices:ApiKey | The key you copied before
   * For the **Target resource type**, choose **App Service** and select the Web App
   * If you would add new Web App instances in other Azure regions later on, you can add them as endpoints here and they would get added to the Traffic Manager DNS name without any end user impact
   * ![Add Traffic Manager Endpoint](media/trafficmanager-endpoint-add.png)
-* Open the **Configuration** blade for the Traffic Manager profile and note that the **Routing method** is set to **Performance**
-  * This means that the DNS name will resolve to the instance of the Web App that has the best performance for the user's location (usually the geographically closest region)
+* Open the **Configuration** blade for the Traffic Manager profile
+  * Notice that the **Routing method** is set to **Performance**, which means that the DNS name will resolve to the instance of the Web App that has the best performance for the user's location (usually the geographically closest region)
+  * Also notice that by default, Traffic Manager will probe the back-end resource for health using `HTTP` on port `80`, but the web application is configured to require `https` so it will send an HTTP redirect status code causing the probe to fail
+  * To fix this, change the **Endpoint monitor settings** to use `HTTPS` on port `443`
+  * ![Update Traffic Manager Configuration](media/trafficmanager-configuration.png)
 * Now browse to the `http://<prefix>.trafficmanager.net` site
-  * Notice that the web application is configured to require `https` so it will redirect the browser to `https://<prefix>.trafficmanager.net`
+  * As explained above, notice that the web application will redirect the browser to `https://<prefix>.trafficmanager.net`
   * At this point, the web application is still using an SSL certificate for `*.azurewebsites.net` so the browser will warn you about an invalid SSL certificate (since the host name does not match), which in this particular case can be safely ignored but will be fixed in a later step
 * When attempting to sign in to the web application via this Traffic Manager URL, you will get an error because the URL is not configured in Azure AD B2C
   * Navigate back to the Azure AD B2C tenant and add the `https://<prefix>.trafficmanager.net/signin-oidc` Reply URL to the registered Web Application
