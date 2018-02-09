@@ -58,8 +58,13 @@ To complete this scenario, you will need:
   * Search Service
   * SQL Database
   * Storage Account
+  * Content Delivery Network
   * Cognitive Services
   * Traffic Manager
+  * App Service Domain
+  * DNS Zone
+  * App Service Certificate
+  * Key Vault
 * When choosing names for your resources, try to follow a **standard naming pattern**, e.g. by following the [naming conventions documented on the Azure Architecture Center](https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions)
   * To make it easier, we'll provide suggestions based on a naming prefix of your choosing, referred to as `<prefix>` from this point onwards
   * To ensure that your deployment does not conflict with other Azure customers, use a prefix that is unique to your organization
