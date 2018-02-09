@@ -22,6 +22,8 @@
   * [Use a Content Delivery Network for static files](#use-a-content-delivery-network-for-static-files)
   * [Add sentiment analysis for reviews using Cognitive Services](#add-sentiment-analysis-for-reviews-using-cognitive-services)
   * [Prepare the web app for global availability using Traffic Manager](#prepare-the-web-app-for-global-availability-using-traffic-manager)
+  * [Set up a custom DNS domain](#set-up-a-custom-dns-domain)
+  * [Configure an SSL certificate for your domain](#configure-an-ssl-certificate-for-your-domain)
 * [Next Steps](#next-steps)
 
 ## Introduction
@@ -363,22 +365,52 @@ App:CognitiveServices:ApiKey | The key you copied before
   * This means that the DNS name will resolve to the instance of the Web App that has the best performance for the user's location (usually the geographically closest region)
 * Now browse to the `http://<prefix>.trafficmanager.net` site
   * Notice that the web application is configured to require `https` so it will redirect the browser to `https://<prefix>.trafficmanager.net`
-  * Unfortunately, at this time Traffic Manager does _not_ provide a valid SSL certificate for the `*.trafficmanager.net` domain out of the box
-  * The browser will therefore warn you about an invalid SSL certificate, which in this particular case can be safely ignored
-  * For production instances, you would now typically [bind an existing SSL certificate to your Web App](https://docs.microsoft.com/en-us/azure/app-service-web/app-service-web-tutorial-custom-SSL), or [buy and configure an SSL certificate directly from Azure](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-purchase-ssl-web-site)
-  * Then you can [configure your custom domain name for the Traffic Manager profile](https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-traffic-manager-custom-domain-name)
-  * If you would do this, everything should function over `https` without any browser warnings
-* When attempting to sign in via this Traffic Manager URL, you will get an error because the URL is not configured in Azure AD B2C
+  * At this point, the web application is still using an SSL certificate for `*.azurewebsites.net` so the browser will warn you about an invalid SSL certificate (since the host name does not match), which in this particular case can be safely ignored but will be fixed in a later step
+* When attempting to sign in to the web application via this Traffic Manager URL, you will get an error because the URL is not configured in Azure AD B2C
   * Navigate back to the Azure AD B2C tenant and add the `https://<prefix>.trafficmanager.net/signin-oidc` Reply URL to the registered Web Application
   * Notice that you must remove the old Reply URL as it's currently not allowed to configure more than one external domain
   * After the configuration is updated, you should now be able to sign in again with the same account as before
+
+#### Set up a custom DNS domain
+> This moves your e-commerce site to its own internet domain to increase visibility and trust
+
+* If you already own a domain that you want to use for your Web App, follow the steps to [map an existing custom DNS name](https://docs.microsoft.com/en-us/azure/app-service/app-service-web-tutorial-custom-domain) and skip the next step
+* Back in the Azure Portal, navigate to the App Service for the Web App, open the **Custom domains** blade and [buy a new App Service Domain](https://docs.microsoft.com/en-us/azure/app-service/custom-dns-web-site-buydomains-web-app#buy-the-domain)
+  * When assigning default hostnames, select only `www`  and not `@ (Root Domain)` as this isn't supported by Traffic Manager
+  * ![Create App Service Domain](media/appservicedomain-create.png)
+* At this time, the DNS record for the `www` subdomain points directly to the Web App's DNS name (e.g. `http://<your-site-name>.azurewebsites.net`), which needs to be changed to the Traffic Manager endpoint by following the steps for [configuring a custom domain name for a web app in Azure App Service using Traffic Manager](https://docs.microsoft.com/en-us/azure/app-service/web-sites-traffic-manager-custom-domain-name)
+  * If you purchased the domain through the App Service Domain service as explained above, you can manage your DNS records in Azure directly
+  * Back in the Azure Portal, navigate to the DNS zone resource for your custom domain and update the `www` CNAME record to point to your Traffic Manager endpoint (e.g. `<prefix>.trafficmanager.net`)
+  * ![Update DNS Zone](media/dnszone-update.png)
+* At this time, the CDN Endpoint also still points at the original Web App URL which must be updated
+  * Navigate to the CDN Endpoint resource and open the **Origin** blade
+  * Update the **Origin hostname** and **Origin host header** to match your custom domain (including `www`)
+  * ![Update CDN Endpoint](media/cdnendpoint-update.png)
+* When the custom domain has been configured successfully, browse to the website to verify that it works
+  * Notice that like before with Traffic Manager, the web application is configured to require `https` so it will redirect the browser and show a warning about an invalid SSL certificate - but this will be fixed in a later step
+* Also like before, when attempting to sign in to the web application via your custom domain, you will get an error because the URL is not configured in Azure AD B2C
+  * Navigate back to the Azure AD B2C tenant and change the Reply URL for the registered Web Application from the Traffic Manager endpoint to `https://<your-domain>/signin-oidc` (e.g. `https://www.relecloudconcerts.com/signin-oidc`)
+  * After the configuration is updated, you should now be able to sign in again with the same account as before
+
+### Configure an SSL certificate for your domain
+> This ensures your users have a safe online experience when using your e-commerce site
+
+* If you already own an SSL certificate that you want to use for your Web App, follow the steps to [bind an existing custom SSL certificate](https://docs.microsoft.com/en-us/Azure/app-service/app-service-web-tutorial-custom-ssl) and skip this section
+* Go back to your Resource Group in the Azure Portal and [create a new App Service Certificate](https://docs.microsoft.com/en-us/azure/app-service/web-sites-purchase-ssl-web-site)
+  * ![Create App Service Certificate](media/appservicecertificate-create.png)
+* Once the certificate is ready (and you may have to check your email to complete a verification step), navigate to the App Service Certificate resource in the portal to place it in Key Vault
+  * If you don't have a Key Vault yet, you are prompted to create one
+  * _Suggested name for the Key Vault: `<prefix>-vault`_
+  * ![Create Key Vault](media/keyvault-create.png)
+* Follow the other steps in the documentation referred to above to verify the domain ownership (if needed), assign the certificate to the Web App and add the SSL binding
+* At this point, you should be able to navigate to the web application on your custom domain using `https` without any browser warnings
 
 ## Next Steps
 
 This concludes the scenario. Please find some additional things you can do at this point below.
 
 #### Deploy using an ARM Template
-As an alternative to manually setting up all the necessary resources in Azure and connecting the various services together (e.g. configuring App Settings to connect to other resources, enlisting the main Web App into Traffic Manager, ...), you can use an Azure Resource Manager (ARM) template
+As an alternative to manually setting up all the necessary resources in Azure and connecting the various services together (e.g. configuring App Settings to connect to other resources, enlisting the main Web App into Traffic Manager, ...), you can use an Azure Resource Manager (ARM) template.
 * Learn more about [ARM templates](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-manager-create-first-template)
 * The ARM template for this solution is included in the [Relecloud.Arm](../src/Relecloud.Arm) folder
 * You can publish it in various ways, e.g.: 
@@ -387,3 +419,5 @@ As an alternative to manually setting up all the necessary resources in Azure an
   * Using [Visual Studio Code](https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-manager-vscode-extension)
   * ...
 * After the various resources have been created, you only have to publish the `Relecloud.Web` project to the Azure Web App, and the `Relecloud.FunctionApp` project to the Azure Function App as explained above (the app settings for both are automatically populated)
+
+**Important note:** the ARM template creates and configures everything up to and including Traffic Manager, but not the custom domain (since that cannot currently be done via ARM) or the SSL certificate (since that depends on the custom domain). Follow the manual steps detailed above for those sections to complete the full scenario.
