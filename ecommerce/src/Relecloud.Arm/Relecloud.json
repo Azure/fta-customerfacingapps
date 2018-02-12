@@ -184,6 +184,7 @@
     "storageAccountName": "[concat(toLower(parameters('resourcePrefix')), 'storage')]",
     "searchServiceName": "[concat(parameters('resourcePrefix'), '-search')]",
     "searchServiceHostingMode": "Default",
+    "functionPlanName": "[concat(parameters('resourcePrefix'), '-func-plan')]",
     "functionAppName": "[concat(parameters('resourcePrefix'), '-func-app')]",
     "trafficManagerName": "[concat(parameters('resourcePrefix'), '-traffic')]",
     "trafficManagerDnsName": "[concat(parameters('resourcePrefix'), '-traffic')]",
@@ -258,7 +259,7 @@
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "AppServicePlan"
+        "displayName": "WebAppPlan"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
@@ -588,13 +589,29 @@
       }
     },
     {
+      "apiVersion": "2015-04-01",
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[variables('functionPlanName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('functionPlanName')]",
+        "computeMode": "Dynamic",
+        "sku": "Dynamic"
+      },
+      "tags": {
+        "displayName": "FunctionAppPlan"
+      }
+    },
+    {
       "apiVersion": "2016-03-01",
       "name": "[variables('functionAppName')]",
       "location": "[resourceGroup().location]",
       "type": "Microsoft.Web/sites",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]"
+        "[resourceId('Microsoft.Web/serverfarms', variables('functionPlanName'))]",
+        "[resourceId('microsoft.insights/components/', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('cognitiveServicesAccountName'))]"
       ],
       "properties": {
         "name": "[variables('functionAppName')]",
@@ -620,13 +637,13 @@
             "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1)]",
             "FUNCTIONS_EXTENSION_VERSION": "~1",
             "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1)]",
-            "WEBSITE_CONTENTSHARE": "[concat(toLower(variables('functionAppName')), 'bbed')]",
+            "WEBSITE_CONTENTSHARE": "[toLower(variables('functionAppName'))]",
             "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
             "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName'))).InstrumentationKey]",
             "App:SqlDatabase:ConnectionString": "[concat('Data Source=tcp:', reference(resourceId('Microsoft.Sql/servers/', variables('sqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('sqlDatabaseName'), ';User Id=', parameters('sqlDatabaseAdministratorLogin'), '@', variables('sqlServerName'), ';Password=', parameters('sqlDatabaseAdministratorPassword'), ';')]",
             "App:StorageAccount:ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',concat(listKeys(concat(resourceGroup().id,'/providers/Microsoft.Storage/storageAccounts/', variables('storageAccountName')),'2015-05-01-preview').key1))]",
             "App:StorageAccount:EventQueueName": "[variables('eventQueueName')]",
-            "App:CognitiveServices:EndpointUri": "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0",
+            "App:CognitiveServices:EndpointUri": "[reference(resourceId('Microsoft.CognitiveServices/accounts', variables('cognitiveServicesAccountName')),'2017-04-18').endpoint]",
             "App:CognitiveServices:ApiKey": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('cognitiveServicesAccountName')),'2017-04-18').key1]"
           }
         }
@@ -674,7 +691,7 @@
     {
       "apiVersion": "2016-02-01-preview",
       "name": "[variables('cognitiveServicesAccountName')]",
-      "location": "westus",
+      "location": "[resourceGroup().location]",
       "type": "Microsoft.CognitiveServices/accounts",
       "kind": "TextAnalytics",
       "sku": {
