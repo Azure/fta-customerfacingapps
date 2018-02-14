@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Relecloud Concerts</title>
     <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="//ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/themes/redmond/jquery-ui.css" />
     <link rel="stylesheet" href="@Url.CdnContent("~/css/site.css")" asp-append-version="true" />
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
@@ -40,7 +41,7 @@
                 </ul>
                 <form class="navbar-form navbar-left" asp-controller="Concert" asp-action="Search" method="get">
                     <div class="form-group">
-                        <input type="text" name="query" class="form-control" placeholder="Search concerts">
+                        <input type="text" id="query" name="query" class="form-control" placeholder="Search concerts">
                     </div>
                     <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button>
                 </form>
@@ -64,9 +65,9 @@
     </div>
 
     <script src="//ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js" crossorigin="anonymous" integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk"></script>
+    <script src="//ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.min.js"></script>
     <script src="//ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js" crossorigin="anonymous" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"></script>
     <script src="@Url.CdnContent("~/js/site.js")" asp-append-version="true"></script>
-
     @RenderSection("Scripts", required: false)
 </body>
 </html>

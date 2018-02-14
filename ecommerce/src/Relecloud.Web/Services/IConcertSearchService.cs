@@ -8,5 +8,6 @@ namespace Relecloud.Web.Services
     {
         void Initialize();
         Task<ICollection<ConcertSearchResult>> SearchAsync(string query);
+        Task<ICollection<string>> SuggestAsync(string query);
     }
 }

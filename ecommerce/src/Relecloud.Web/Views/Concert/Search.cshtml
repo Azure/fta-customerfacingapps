@@ -17,7 +17,7 @@ else
                     <a asp-controller="Concert" asp-action="Details" asp-route-id="@concert.Id">@concert.Artist &mdash; @concert.Title</a>
                     <span class="label label-info">@concert.Price.ToString("c")</span>
                 </h3>
-                <div class="text-muted">@concert.StartTime.UtcDateTime.ToString() &raquo; @concert.Location</div>
+                <div class="text-muted"><span class="badge">@concert.Genre</span>  @concert.StartTime.UtcDateTime.ToString() &raquo; @concert.Location</div>
                 @if (concert.HitHighlights != null && concert.HitHighlights.Any())
                     {
                     <div class="alert alert-info offset-top-md">

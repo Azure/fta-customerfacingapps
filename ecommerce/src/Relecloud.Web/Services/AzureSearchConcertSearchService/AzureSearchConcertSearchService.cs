@@ -55,11 +55,28 @@ namespace Relecloud.Web.Services.AzureSearchService
                 {
                     new Field(nameof(Concert.Id), DataType.String) { IsKey = true, IsSearchable = false },
                     new Field(nameof(Concert.Artist), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
-                    new Field(nameof(Concert.Location), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
+                    new Field(nameof(Concert.Genre), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true, IsFilterable = true, IsFacetable = true },
+                    new Field(nameof(Concert.Location), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true, IsFilterable = true, IsFacetable = true },
                     new Field(nameof(Concert.Title), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
                     new Field(nameof(Concert.Description), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
                     new Field(nameof(Concert.Price), DataType.Double) { IsSearchable = false, IsFilterable = true, IsFacetable = true, IsSortable = true, IsRetrievable = true },
                     new Field(nameof(Concert.StartTime), DataType.DateTimeOffset) { IsSearchable = false, IsRetrievable = true, IsSortable = true, IsFilterable = true },
+                },
+                Suggesters = new[]
+                {
+                    new Suggester("default-suggester", SuggesterSearchMode.AnalyzingInfixMatching, nameof(Concert.Artist), nameof(Concert.Location), nameof(Concert.Title))
+                },
+                DefaultScoringProfile = "default-scoring",
+                ScoringProfiles = new[]
+                {
+                    new ScoringProfile("default-scoring")
+                    {
+                        // Add a lot of weight to the artist and above average weight to the title.
+                        TextWeights = new TextWeights(new Dictionary<string, double> {
+                            { nameof(Concert.Artist), 2.0 },
+                            { nameof(Concert.Title), 1.5 }
+                        })
+                    }
                 }
             };
             serviceClient.Indexes.CreateOrUpdate(concertsIndex);
@@ -112,6 +129,7 @@ namespace Relecloud.Web.Services.AzureSearchService
                     HitHighlights = concertResult.Highlights == null ? new string[0] : concertResult.Highlights.SelectMany(h => h.Value).ToArray(),
                     Id = int.Parse((string)concertResult.Document[nameof(Concert.Id)]),
                     Artist = (string)concertResult.Document[nameof(Concert.Artist)],
+                    Genre = (string)concertResult.Document[nameof(Concert.Genre)],
                     Location = (string)concertResult.Document[nameof(Concert.Location)],
                     Title = (string)concertResult.Document[nameof(Concert.Title)],
                     Description = (string)concertResult.Document[nameof(Concert.Description)],
@@ -120,6 +138,24 @@ namespace Relecloud.Web.Services.AzureSearchService
                 });
             }
             return items;
+        }
+
+        #endregion
+
+        #region Suggest
+
+        public async Task<ICollection<string>> SuggestAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return new string[0];
+            }
+            var parameters = new SuggestParameters
+            {
+                Top = 10
+            };
+            var results = await this.concertsIndexClient.Documents.SuggestAsync(query, "default-suggester", parameters);
+            return results.Results.Select(s => s.Text).Distinct().ToArray();
         }
 
         #endregion

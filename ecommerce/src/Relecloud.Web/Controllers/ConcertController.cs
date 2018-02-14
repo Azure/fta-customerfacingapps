@@ -80,5 +80,15 @@ namespace Relecloud.Web.Controllers
         }
 
         #endregion
+
+        #region Suggest
+
+        public async Task<JsonResult> Suggest(string query)
+        {
+            var suggestions = await this.concertSearchService.SuggestAsync(query);
+            return Json(suggestions);
+        }
+
+        #endregion
     }
 }

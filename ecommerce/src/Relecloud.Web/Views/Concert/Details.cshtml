@@ -6,7 +6,7 @@
     @Model.Artist &ndash; @Model.Title
     <span class="label label-info">@Model.Price.ToString("c")</span>
 </h1>
-<div class="text-muted">@Model.StartTime.UtcDateTime.ToString() &raquo; @Model.Location</div>
+<div class="text-muted"><span class="badge">@Model.Genre</span> @Model.StartTime.UtcDateTime.ToString() &raquo; @Model.Location</div>
 <div class="well offset-top-md">@Model.Description</div>
 <a asp-controller="Cart" asp-action="Add" asp-route-concertId="@Model.Id" class="btn btn-success">Add To Cart &raquo;</a>
 
