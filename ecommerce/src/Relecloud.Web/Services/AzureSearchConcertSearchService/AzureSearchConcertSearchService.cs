@@ -13,6 +13,7 @@ namespace Relecloud.Web.Services.AzureSearchService
         #region Constants
 
         private const string IndexNameConcerts = "concerts";
+        private const int PriceFacetInterval = 20;
 
         #endregion
 
@@ -107,8 +108,9 @@ namespace Relecloud.Web.Services.AzureSearchService
 
         #region Search
 
-        public async Task<ICollection<ConcertSearchResult>> SearchAsync(string query)
+        public async Task<SearchResponse<ConcertSearchResult>> SearchAsync(SearchRequest request)
         {
+            var query = request.Query;
             if (string.IsNullOrWhiteSpace(query))
             {
                 query = "*";
@@ -118,7 +120,17 @@ namespace Relecloud.Web.Services.AzureSearchService
             // Search concerts.
             var concertQueryParameters = new SearchParameters
             {
-                HighlightFields = new[] { nameof(Concert.Description) }
+                // Highlight the search text in the description
+                HighlightFields = new[] { nameof(Concert.Description) },
+
+                // Sort on the requested field.
+                OrderBy = GetOrderBy(request),
+
+                // Filter on the requested fields.
+                Filter = GetFilter(request),
+
+                // Request facet information.
+                Facets = new[] { $"{nameof(Concert.Price)},interval:{PriceFacetInterval}", nameof(Concert.Genre), nameof(Concert.Location) }
             };
             var concertResults = await this.concertsIndexClient.Documents.SearchAsync(query, concertQueryParameters);
             foreach (var concertResult in concertResults.Results)
@@ -137,7 +149,17 @@ namespace Relecloud.Web.Services.AzureSearchService
                     StartTime = (DateTimeOffset)concertResult.Document[nameof(Concert.StartTime)]
                 });
             }
-            return items;
+
+            // Process the search facets.
+            var facets = new List<SearchFacet>();
+            foreach (var facetResultsForField in concertResults.Facets)
+            {
+                var fieldName = facetResultsForField.Key;
+                var facetValues = facetResultsForField.Value.Select(f => GetFacetValue(fieldName, f)).ToArray();
+                facets.Add(new SearchFacet(fieldName, fieldName, facetValues));
+            }
+
+            return new SearchResponse<ConcertSearchResult>(request, items, facets);
         }
 
         #endregion
@@ -156,6 +178,55 @@ namespace Relecloud.Web.Services.AzureSearchService
             };
             var results = await this.concertsIndexClient.Documents.SuggestAsync(query, "default-suggester", parameters);
             return results.Results.Select(s => s.Text).Distinct().ToArray();
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        private static IList<string> GetOrderBy(SearchRequest request)
+        {
+            return new[] { request.SortOn + (request.SortDescending ? " desc" : "") };
+        }
+
+        private string GetFilter(SearchRequest request)
+        {
+            var filters = new List<string>();
+            if (!string.IsNullOrWhiteSpace(request.PriceRange))
+            {
+                var priceRangeStart = int.Parse(request.PriceRange);
+                var priceRangeEnd = priceRangeStart + PriceFacetInterval;
+                filters.Add($"({nameof(Concert.Price)} ge {priceRangeStart} and {nameof(Concert.Price)} lt {priceRangeEnd})");
+            }
+            if (!string.IsNullOrWhiteSpace(request.Genre))
+            {
+                filters.Add($"({nameof(Concert.Genre)} eq '{request.Genre}')");
+
+            }
+            if (!string.IsNullOrWhiteSpace(request.Location))
+            {
+                filters.Add($"({nameof(Concert.Location)} eq '{request.Location}')");
+
+            }
+            return string.Join(" and ", filters);
+        }
+
+        private static SearchFacetValue GetFacetValue(string fieldName, FacetResult facetResult)
+        {
+            var count = facetResult.Count ?? 0;
+            if (string.Equals(fieldName, nameof(Concert.Price), StringComparison.OrdinalIgnoreCase))
+            {
+                var priceRangeStart = Convert.ToInt32(facetResult.Value);
+                var priceRangeEnd = priceRangeStart + PriceFacetInterval - 1;
+                var value = priceRangeStart.ToString();
+                var displayName = $"{priceRangeStart.ToString("c0")} - {priceRangeEnd.ToString("c0")}";
+                return new SearchFacetValue(value, displayName, count);
+            }
+            else
+            {
+                var value = (string)facetResult.Value;
+                return new SearchFacetValue(value, value, count);
+            }
         }
 
         #endregion

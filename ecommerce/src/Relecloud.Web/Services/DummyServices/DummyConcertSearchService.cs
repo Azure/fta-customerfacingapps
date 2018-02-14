@@ -11,9 +11,9 @@ namespace Relecloud.Web.Services.DummyServices
         {
         }
 
-        public Task<ICollection<ConcertSearchResult>> SearchAsync(string query)
+        public Task<SearchResponse<ConcertSearchResult>> SearchAsync(SearchRequest request)
         {
-            return Task.FromResult<ICollection<ConcertSearchResult>>(Array.Empty<ConcertSearchResult>());
+            return Task.FromResult(new SearchResponse<ConcertSearchResult>(request, Array.Empty<ConcertSearchResult>(), Array.Empty<SearchFacet>()));
         }
 
         public Task<ICollection<string>> SuggestAsync(string query)

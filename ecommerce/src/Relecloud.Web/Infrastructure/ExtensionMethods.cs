@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
+using Relecloud.Web.Models;
 using System;
 using System.Security.Claims;
 
@@ -35,6 +38,66 @@ namespace Relecloud.Web.Infrastructure
                 return new Uri(CdnUrl, path).ToString();
             }
             return path;
+        }
+
+        public static IHtmlContent LinkForSortType(this IHtmlHelper html, SearchRequest request, string sortOn, bool sortDescending, string linkText)
+        {
+            var routeValues = request.Clone();
+            if (string.Equals(routeValues.SortOn, sortOn) && routeValues.SortDescending == sortDescending)
+            {
+                routeValues.SortOn = null;
+                routeValues.SortDescending = false;
+                linkText = "[X] " + linkText;
+            }
+            else
+            {
+                routeValues.SortOn = sortOn;
+                routeValues.SortDescending = sortDescending;
+            }
+            return html.ActionLink(linkText, "Search", "Concert", null, null, null, routeValues, null);
+        }
+
+        public static IHtmlContent LinkForSearchFacet(this IHtmlHelper html, SearchRequest request, SearchFacet facet, SearchFacetValue facetValue)
+        {
+            var routeValues = request.Clone();
+            var linkText = $"{facetValue.DisplayName} ({facetValue.Count})";
+            if (string.Equals(facet.FieldName, nameof(Concert.Price), StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(routeValues.PriceRange))
+                {
+                    routeValues.PriceRange = null;
+                    linkText = "[X] " + linkText;
+                }
+                else
+                {
+                    routeValues.PriceRange = facetValue.Value;
+                }
+            }
+            else if (string.Equals(facet.FieldName, nameof(Concert.Genre), StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(routeValues.Genre))
+                {
+                    routeValues.Genre = null;
+                    linkText = "[X] " + linkText;
+                }
+                else
+                {
+                    routeValues.Genre = facetValue.Value;
+                }
+            }
+            else if (string.Equals(facet.FieldName, nameof(Concert.Location), StringComparison.OrdinalIgnoreCase))
+            {
+                if (!string.IsNullOrWhiteSpace(routeValues.Location))
+                {
+                    routeValues.Location = null;
+                    linkText = "[X] " + linkText;
+                }
+                else
+                {
+                    routeValues.Location = facetValue.Value;
+                }
+            }
+            return html.ActionLink(linkText, "Search", "Concert", null, null, null, routeValues, null);
         }
     }
 }

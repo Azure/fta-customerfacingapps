@@ -55,9 +55,9 @@ namespace Relecloud.Web.Controllers
 
         #region Search
 
-        public async Task<IActionResult> Search(string query)
+        public async Task<IActionResult> Search(SearchRequest request)
         {
-            var result = await this.concertSearchService.SearchAsync(query);
+            var result = await this.concertSearchService.SearchAsync(request);
             return View(result);
         }
 

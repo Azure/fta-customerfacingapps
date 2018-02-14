@@ -1,33 +1,68 @@
-﻿@model IList<Relecloud.Web.Models.ConcertSearchResult>
+﻿@model SearchResponse<ConcertSearchResult>
 @{
     ViewData["Title"] = "Search";
 }
-<h1>@ViewData["Title"]</h1>
-@if (!Model.Any())
-{
-    <div class="alert alert-warning">Your query didn't return any results.</div>
-}
-else
-{
-    <div class="list-group">
-        @foreach (var concert in Model)
+<div class="row">
+    <div class="col-md-4">
+        <h3>Search</h3>
+
+        <h4>Sort</h4>
+        <ul class="list-unstyled">
+            <li>@Html.LinkForSortType(Model.Request, nameof(Concert.Price), false, "Price (Lowest First)")</li>
+            <li>@Html.LinkForSortType(Model.Request, nameof(Concert.Price), true, "Price (Highest First)")</li>
+            <li>@Html.LinkForSortType(Model.Request, nameof(Concert.StartTime), false, "Date (Earliest First)")</li>
+            <li>@Html.LinkForSortType(Model.Request, nameof(Concert.StartTime), true, "Date (Latest First)")</li>
+        </ul>
+
+        @if (Model.Facets != null && Model.Facets.Any())
         {
-            <div class="list-group-item">
-                <h3 class="list-group-item-heading">
-                    <a asp-controller="Concert" asp-action="Details" asp-route-id="@concert.Id">@concert.Artist &mdash; @concert.Title</a>
-                    <span class="label label-info">@concert.Price.ToString("c")</span>
-                </h3>
-                <div class="text-muted"><span class="badge">@concert.Genre</span>  @concert.StartTime.UtcDateTime.ToString() &raquo; @concert.Location</div>
-                @if (concert.HitHighlights != null && concert.HitHighlights.Any())
+            foreach (var facet in Model.Facets)
+            {
+                <h4>@facet.DisplayName</h4>
+                <ul class="list-unstyled">
+                    @foreach (var facetValue in facet.Values)
                     {
-                    <div class="alert alert-info offset-top-md">
-                        @foreach (var hitHighlight in concert.HitHighlights)
+                        <li>@Html.LinkForSearchFacet(Model.Request, facet, facetValue)</li>
+                    }
+                </ul>
+            }
+        }
+    </div>
+    <div class="col-md-8">
+        <h3>
+            Results
+            @if (!string.IsNullOrWhiteSpace(Model.Request.Query))
+            {
+                <span>for &quot;@Model.Request.Query&quot;</span>
+            }
+        </h3>
+        @if (!Model.Results.Any())
+        {
+            <div class="alert alert-warning">Your query didn't return any results.</div>
+        }
+        else
+        {
+            <div class="list-group">
+                @foreach (var concert in Model.Results)
+                {
+                    <div class="list-group-item">
+                        <h3 class="list-group-item-heading">
+                            <a asp-controller="Concert" asp-action="Details" asp-route-id="@concert.Id">@concert.Artist &mdash; @concert.Title</a>
+                            <span class="label label-info">@concert.Price.ToString("c")</span>
+                        </h3>
+                        <div class="text-muted"><span class="badge">@concert.Genre</span>  @concert.StartTime.UtcDateTime.ToString() &raquo; @concert.Location</div>
+                        @if (concert.HitHighlights != null && concert.HitHighlights.Any())
                         {
-                            <div class="highlight">@Html.Raw(hitHighlight)</div>
+                            <div class="alert alert-info offset-top-md">
+                                @foreach (var hitHighlight in concert.HitHighlights)
+                                {
+                                    <div class="highlight">@Html.Raw(hitHighlight)</div>
+                                }
+                            </div>
                         }
                     </div>
                 }
             </div>
         }
     </div>
-}
+</div>
