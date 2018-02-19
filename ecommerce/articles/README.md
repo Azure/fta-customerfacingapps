@@ -332,12 +332,11 @@ App:Cdn:Url | The CDN Endpoint URL you copied before
 #### Add sentiment analysis for reviews using Cognitive Services
 > This allows you to determine whether the sentiment of a user review is positive or negative
 
-* Go back to your Resource Group in the Azure Portal and [create a new Cognitive Services API](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account)
-  * _Suggested name for the Cognitive Services resource: `<prefix>-cognitiveservices`_
-  * For the **API type**, choose **Text Analytics API**
-  * For the **Pricing tier**, choose the `Free F0` if possible (there is a limit of one free account per subscription) or the `Standard S1` otherwise
-  * ![Create Cognitive Services](media/cognitiveservices-create.png)
-* After the Cognitive Service has been created
+* Go back to your Resource Group in the Azure Portal and [create a new Text Analytics API](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account)
+  * _Suggested name for the Text Analytics API resource: `<prefix>-cognitiveservices`_
+  * For the **Pricing tier**, choose the `Free F0` if possible or the `Standard S0` otherwise
+  * ![Create Text Analytics API](media/cognitiveservices-create.png)
+* After the Text Analytics API has been created
   * Open the **Overview** blade and copy the **Endpoint** URL to Notepad
   * Open the **Keys** blade and copy **Key 1** to Notepad
 * Navigate to the Function App in the Azure Portal and open the **Application settings** tab
