@@ -741,7 +741,7 @@ spec:
         - containerPort: 80
         env:
         - name: TransactionDb
-          value: "Server=tcp:finance-db;Initial Catalog=ContosoFinance;Persist Security Info=False;User ID=sa;Password=<YOUR PASSWORD>.;MultipleActiveResultSets=False;Connection Timeout=30;"
+          value: "Server=tcp:finance-db,10433;Initial Catalog=ContosoFinance;Persist Security Info=False;User ID=sa;Password=<YOUR PASSWORD>.;MultipleActiveResultSets=False;Connection Timeout=30;"
 ---
 apiVersion: v1
 kind: Service
@@ -776,7 +776,7 @@ spec:
         - containerPort: 80
         env:
         - name: IdentityConnection
-          value: "Server=tcp:finance-db;Initial Catalog=ContosoFinance;Persist Security Info=False;User ID=sa;Password=<YOUR PASSWORD>.;MultipleActiveResultSets=False;Connection Timeout=30;"
+          value: "Server=tcp:finance-db,10433;Initial Catalog=ContosoFinance;Persist Security Info=False;User ID=sa;Password=<YOUR PASSWORD>.;MultipleActiveResultSets=False;Connection Timeout=30;"
         - name: APIServer
           value: "REPLACE WITH THE IP YOU COPIED EARLIER"
 ---
