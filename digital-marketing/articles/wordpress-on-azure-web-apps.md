@@ -20,6 +20,7 @@ Your digital marketing solution allows your organization to engage with customer
 
 * Understanding the Azure App Service platform and installing/configuring WordPress on Web Apps
 * Implementing various best practices to run WordPress on Azure
+* Creating a sample WordPress post and publishing
 * How to migrate your existing WordPress site from on-premises or colo to Azure
 * Deploying a WordPress site with a MySQL database on Azure IaaS VMs
 * Adding a custom domain to your WordPress site
