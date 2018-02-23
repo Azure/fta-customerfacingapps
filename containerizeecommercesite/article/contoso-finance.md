@@ -1,4 +1,5 @@
 # POC Scenario Contoso Finance #
+![Screenshot](images/Contoso-Finance.png)
 
 ## Abstract ##
 
