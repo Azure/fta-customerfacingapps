@@ -22,6 +22,7 @@ In order to complete this POC you will need:
 	- Data storage and processing
 - Download latest **SQL Server Management Studio** [here](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms)
 - Download and install the latest **Docker Tools** from [here](https://docs.docker.com/docker-for-windows/install/)
+- Download the **Contoso Finance Project** from [here](https://github.com/Azure/fta-customerfacingapps/tree/master/containerizeecommercesite/Contoso-Finance.zip)
 
 ## Table of Content ##
 1. [Create an **Azure SQL DB** and publish database](https://github.com/Azure/fta-internalbusinessapps/blob/master/appmodernization/containers/articles/contoso-finance.md#create-an-azure-sql-db-and-publish-database)
