@@ -48,17 +48,19 @@ Your digital marketing solution allows your organization to engage with customer
     * Password: **your strong password**
     * Confirm password: **your strong password**
     * Version: **5.7 or latest version**
-    * Pricing Tier: **Basic**
-        * Compute Units: **50**
-        * Storage (GB): **50**
+    * Pricing Tier: **General Purpose**
+        * Compute Generation: **Gen 5**
+        * vCore: **2 vCores**
+        * Storage: **5 GB**
+        * Backup Retention Period: **7 Days**
     * Database name: **fasttrackdemomysqldb**
 * Click **OK**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-2.png)
 * Application Insights: **Off**
-* Click **Create**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-3.png)
+* Click **Create**
 
 ## Configuring WordPress on Azure Web Apps
 
