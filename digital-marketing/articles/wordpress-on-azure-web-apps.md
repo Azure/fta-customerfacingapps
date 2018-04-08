@@ -148,7 +148,7 @@ To disable the ARR cookie:
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-15.png)
 * After installation, make sure to click **Activate**
-* Connecting to the Redis cache by updating the **wp-config.php** configuration file
+* Connect to the Redis cache by updating the **wp-config.php** configuration file
     * To edit the wp-config.php file, go to the Web App Kudu console, by selecting Web App --> search **Kudu** --> **Advanced Tools** --> click **Go**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-17.png)
