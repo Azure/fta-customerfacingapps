@@ -7,7 +7,7 @@
 * [Configuring WordPress on Azure Web Apps](#configuring-wordpress-on-azure-web-apps)
 * [Best Practices for running WordPress on Azure Web Apps](#best-practices-for-running-wordpress-on-azure-web-apps)
 * [Creating a sample Post](#creating-a-sample-post)
-* [Migrating WordPress Site](#migrating-wordpress-site)
+* [Migrating WordPress Site](#migrating-a-wordpress-site)
 * [WordPress site with MySQL db on IaaS VM](#wordpress-site-with-mysql-db-on-iaas-vm)
 * [Adding Custom Domain](#adding-custom-domain)
 * [Adding TLS](#adding-tls)
