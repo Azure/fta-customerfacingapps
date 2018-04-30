@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
 using Relecloud.Web.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Relecloud.Web.Controllers
@@ -15,6 +17,7 @@ namespace Relecloud.Web.Controllers
         private readonly IConcertRepository concertRepository;
         private readonly IConcertSearchService concertSearchService;
         private readonly IEventSenderService eventSenderService;
+        private readonly TelemetryClient telemetryClient = new TelemetryClient();
 
         #endregion
 
@@ -75,6 +78,7 @@ namespace Relecloud.Web.Controllers
                 review.CreatedTime = DateTimeOffset.UtcNow;
                 await this.concertRepository.AddReviewAsync(review);
                 await this.eventSenderService.SendEventAsync(Event.ReviewCreated(review.Id));
+                this.telemetryClient.TrackEvent("ReviewSubmitted", new Dictionary<string, string> { { "ConcertId", review.ConcertId.ToString() }, { "Description", review.Description }, { "Rating", review.Rating.ToString() } });
             }
             return RedirectToAction(nameof(Details), new { id = review.ConcertId });
         }

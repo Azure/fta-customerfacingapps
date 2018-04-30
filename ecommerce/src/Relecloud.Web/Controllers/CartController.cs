@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.ApplicationInsights;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
@@ -15,6 +16,7 @@ namespace Relecloud.Web.Controllers
 
         private readonly IConcertRepository concertRepository;
         private readonly IEventSenderService eventSenderService;
+        private readonly TelemetryClient telemetryClient = new TelemetryClient();
 
         #endregion
 
@@ -62,6 +64,7 @@ namespace Relecloud.Web.Controllers
                 }
                 cartData[concertId] = cartData[concertId] + count;
                 SetCartData(cartData);
+                this.telemetryClient.TrackEvent("AddToCart", new Dictionary<string, string> { { "ConcertId", concertId.ToString() }, { "Count", count.ToString() } });
             }
             return RedirectToAction(nameof(Index));
         }
@@ -81,6 +84,7 @@ namespace Relecloud.Web.Controllers
                     cartData.Remove(concertId);
                 }
                 SetCartData(cartData);
+                this.telemetryClient.TrackEvent("RemoveFromCart", new Dictionary<string, string> { { "ConcertId", concertId.ToString() } });
             }
             return RedirectToAction(nameof(Index));
         }
@@ -118,9 +122,10 @@ namespace Relecloud.Web.Controllers
                         await this.eventSenderService.SendEventAsync(Event.TicketCreated(ticket.Id));
                     }
                 }
-                
+
                 // Remove all items from the cart.
                 SetCartData(new Dictionary<int, int>());
+                this.telemetryClient.TrackEvent("CheckoutCart");
             }
             return RedirectToAction(nameof(Index), "Ticket");
         }

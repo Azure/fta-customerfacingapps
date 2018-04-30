@@ -65,7 +65,7 @@ namespace Relecloud.Web.Services.AzureSearchService
                 },
                 Suggesters = new[]
                 {
-                    new Suggester("default-suggester", SuggesterSearchMode.AnalyzingInfixMatching, nameof(Concert.Artist), nameof(Concert.Location), nameof(Concert.Title))
+                    new Suggester("default-suggester", nameof(Concert.Artist), nameof(Concert.Location), nameof(Concert.Title))
                 },
                 DefaultScoringProfile = "default-scoring",
                 ScoringProfiles = new[]
