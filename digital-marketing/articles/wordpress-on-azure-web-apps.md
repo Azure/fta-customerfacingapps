@@ -7,7 +7,7 @@
 * [Configuring WordPress on Azure Web Apps](#configuring-wordpress-on-azure-web-apps)
 * [Best Practices for running WordPress on Azure Web Apps](#best-practices-for-running-wordpress-on-azure-web-apps)
 * [Creating a sample Post](#creating-a-sample-post)
-* [Migrating WordPress Site](#migrating-wordpress-site)
+* [Migrating WordPress Site](#migrating-a-wordpress-site)
 * [WordPress site with MySQL db on IaaS VM](#wordpress-site-with-mysql-db-on-iaas-vm)
 * [Adding Custom Domain](#adding-custom-domain)
 * [Adding TLS](#adding-tls)
@@ -34,7 +34,7 @@ Your digital marketing solution allows your organization to engage with customer
 * Enter an **App name** (example: fasttrackdemo) for your WordPress site, it will validate to make sure the sub domain name is available under azurewebsites.net.
 * Select your **Subscription**.
 * For **Resource Group** click Create new for this demo (example:fasttrackdemo-test-rg).
-* For **Database Provider** select **Azure Database for MySQL (Preview)** for this demo.
+* For **Database Provider** select **Azure Database for MySQL** for this demo.
 * Select **App Service Plan/Location**, click Create New, enter:
     * App Service Plan: **fasttrackdemo-asp**
     * Location: **West US**
@@ -48,17 +48,19 @@ Your digital marketing solution allows your organization to engage with customer
     * Password: **your strong password**
     * Confirm password: **your strong password**
     * Version: **5.7 or latest version**
-    * Pricing Tier: **Basic**
-        * Compute Units: **50**
-        * Storage (GB): **50**
+    * Pricing Tier: **General Purpose**
+        * Compute Generation: **Gen 5**
+        * vCore: **2 vCores**
+        * Storage: **5 GB**
+        * Backup Retention Period: **7 Days**
     * Database name: **fasttrackdemomysqldb**
 * Click **OK**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-2.png)
 * Application Insights: **Off**
-* Click **Create**.
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-3.png)
+* Click **Create**
 
 ## Configuring WordPress on Azure Web Apps
 
@@ -98,7 +100,7 @@ Your digital marketing solution allows your organization to engage with customer
 In this section, we will configure WordPress with few best practices.
 
 ### **Disable the ARR cookie**
-> Azure Web Apps make great use of the Application Request Routing (ARR) IIS Extension to distribute connections between active instances. ARR helps keep track of users by giving them a special cookie (known as an affinity cookie) that allows Azure Websites to know upon subsequent requests which server instance handled previous requests by the same user. This way, we can be sure that once a client establishes a session with a specific server instance, he will keep talking to the same server as long as the session is active. This is of particular importance for session-sensitive applications (a.k.a. stateful application). Because WordPress is stateless by default and stores all the session information in the database, it does not require clients to connect to the same web server instance. Disabling the ARR cookie will improve performance when running a WordPress site on multiple instances. More info at [Disable Session affinity cookie (ARR cookie) for Azure web apps](https://blogs.msdn.microsoft.com/appserviceteam/2016/05/16/disable-session-affinity-cookie-arr-cookie-for-azure-web-apps/).
+> Azure Web Apps make great use of the Application Request Routing (ARR) IIS Extension to distribute connections between active instances. ARR helps keep track of users by giving them a special cookie (known as an affinity cookie) that allows Azure Websites to know upon subsequent requests which server instance handled previous requests by the same user. This way, we can be sure that once a client establishes a session with a specific server instance, she/he will keep talking to the same server as long as the session is active. This is of particular importance for session-sensitive applications (a.k.a. stateful application). Because WordPress is stateless by default and stores all the session information in the database, it does not require clients to connect to the same web server instance. Disabling the ARR cookie will improve performance when running a WordPress site on multiple instances. More info at [Disable Session affinity cookie (ARR cookie) for Azure web apps](https://blogs.msdn.microsoft.com/appserviceteam/2016/05/16/disable-session-affinity-cookie-arr-cookie-for-azure-web-apps/).
 
 To disable the ARR cookie:
 * Login to the [Azure portal](http://portal.azure.com/).
@@ -111,7 +113,8 @@ To disable the ARR cookie:
 ### **Azure Blob storage for Media Content**
 > If your WordPress site consists of a lot of video and image content, we recommend using blob storage to store all your media content. To learn how to create an Azure storage account, see [How to create an Azure storage account](hhttps://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account). Once you have created the account, activate and configure [Microsoft Azure Storage for WordPress plugin](https://wordpress.org/plugins/windows-azure-storage/) for your WordPress website.
 
-* Make sure to [Create a storage account and a blob container](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account#create-a-storage-account) first before proceeding to next step. Remark: when creating the container make sure you set the **access level** to **Container** so that users visiting the WordPress site can see the actual media content.
+* Make sure to [Create a storage account and a blob container using Azure CLI](https://docs.microsoft.com/en-us/azure/storage/common/storage-quickstart-create-account?tabs=azure-cli) first before proceeding to next step. Remark: when creating the container make sure you set the **access level** to **Container** so that users visiting the WordPress site can see the actual media content. **Important:** There is a known issue with **Microsoft Azure Storage for WordPress** plugin, when you create storage account using Portal, so its recommended that you provision Storage Account using CLI.
+
 * Once the storage account is created, go to the WordPress site Dashboard page. For example: (http://fasttrackdemo.azurewebsites.net/wp-admin/)
 * Click on **Plugins**, then **Add New**
 * In the **Search plugins**, enter **Microsoft Azure Storage for WordPress**
@@ -146,7 +149,7 @@ To disable the ARR cookie:
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-15.png)
 * After installation, make sure to click **Activate**
-* Connecting to the Redis cache by updating the **wp-config.php** configuration file
+* Connect to the Redis cache by updating the **wp-config.php** configuration file
     * To edit the wp-config.php file, go to the Web App Kudu console, by selecting Web App --> search **Kudu** --> **Advanced Tools** --> click **Go**
 
   ![Screenshot](media/wordpress-on-azure-web-apps/wp-17.png)
