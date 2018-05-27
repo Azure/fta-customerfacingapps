@@ -5,4 +5,6 @@ See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackFor
 
 # Containerized E-Commerce Site
 
+## Walkthroughs
+
 * [POC Scenario: Containerize a .NET Core E-commerce Website](article/contoso-finance.md)
