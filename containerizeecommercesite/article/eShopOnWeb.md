@@ -6,7 +6,7 @@ Cloud Modernization Dry Run Steps
 ## Learning Objectives ##
 After completing this excerisize you will be able to:
 
-- Containerize the eShoponWeb E-Commerce Application
+- Containerize the eShopOnWeb E-Commerce Application
 - Build and Push container images to Azure Container Registry
 - Create Build and Release Definitions in VSTS
 - Enable Continuous Integration and Delpoyment in VSTS
@@ -23,11 +23,12 @@ In order to complete this POC you will need:
 	- Azure development
 	- Data storage and processing
 - Download latest **SQL Server Management Studio** [here](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms)
+- Install the latest version of [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
 - Download and install the latest **Docker Tools** from [here](https://docs.docker.com/docker-for-windows/install/)
 - Download the **eShopOnWeb Project** from [here](https://demowebst.blob.core.windows.net/sharecode/eShopOnWebNetCore2.0.zip)
-- Provison and deploy an AKS Cluster in Azure. [Here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal) is a refernce on creating AKS cluster in Azure
+- Provison and deploy an AKS Cluster in Azure. [Here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal) is a reference on creating AKS cluster in Azure
 
-## Steps 
+## Set up the Application Locally 
 * Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
 * Open eShop solution and walk through a few pieces of code
 * Notice that we added the Application Insights Nuget Package
@@ -40,26 +41,27 @@ In order to complete this POC you will need:
 
 ```` JSON
  "CatalogConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=CatalogDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
-    "IdentityConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=IdentityDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+ "IdentityConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=IdentityDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 ````
 
 * Run the application in Visual Studio locally. It will connect to Azure SQL and you can do some shopping on the site.
+
+![Screenshot](images/eShopOnWeb-RunAppLocally.png)
  
-* Show the AppInsights instance we have created in Azure Portal
-* Show the Azure Container Registry that we will be working with
-* Show the AKS cluster that we have configured
+* Create an AppInsights instance, to keep manageable, create it in the same Resource Group as the Managed AKS cluster. Note down the **Instrumentation Key**
+* Create an instance of Azure Container Registry in the Azure Portal. You may keep using the same Resource Group. [Here](https://docs.microsoft.com/en-us/azure/container-registry/) is more information on ACR
+* Your provisioned AKS cluster will look similar to the one below:
+
  
 (The reason why you would want to show steps 6-8 is because values relevant to these will be used in setting up configurations for the build and release definitions)
- 
+
+## Set up Build and Release Definitions in VSTS 
 1.	Go to VSTS, create a new build
 a.	Setup build steps (docker build, docker push, publish k8s files)
 1.	Empty Process, ensure to use Hosted Linux Preview for Agent Queue
 2.	Ensure Use Default Build Context is unchecked and leave the resulting text field blank!!
 b.	Setup CI trigger
 c.	Kick off a build and let it finish
- 
- 
- 
  
  
 2.	Create a release definition
@@ -103,7 +105,7 @@ d.	Deploy
  
  
 ********************************************************************************************
-Application Insights set up
+##  Application Insights set up
  
 Once created, go to the Metrics Explorer
 I have two created.
