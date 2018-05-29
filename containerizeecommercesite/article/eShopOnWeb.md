@@ -16,7 +16,7 @@ After completing this excerisize you will be able to:
 ## Pre-Requisites ##
 In order to complete this POC you will need:
 
-- A **Microsoft Azure** subscription with (at least) contributor access.
+- A **Microsoft Azure** subscription with (at least) contributor access
 - Install latest version of **Visual Studio 2017 Enterprise** with following Workloads:
 	- .NET desktop development
 	- ASP.NET and web development
@@ -25,6 +25,7 @@ In order to complete this POC you will need:
 - Download latest **SQL Server Management Studio** [here](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms)
 - Download and install the latest **Docker Tools** from [here](https://docs.docker.com/docker-for-windows/install/)
 - Download the **eShopOnWeb Project** from [here](https://demowebst.blob.core.windows.net/sharecode/eShopOnWebNetCore2.0.zip)
+- Provison and deploy an AKS Cluster in Azure. [Here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal) is a refernce on creating AKS cluster in Azure
 
 ## Steps 
 1.	Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
