@@ -29,10 +29,20 @@ In order to complete this POC you will need:
 
 ## Steps 
 1.	Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
-2.	Open eShop solution
-3.	Walk through a few pieces of code (pick a few random pieces)
-4.	Show that we added the app insights nuget package
-a.	Show in Startup.cs ConfigureServices where we add the kubernetes connection
+2.	Open eShop solution and walk through a few pieces of code
+3.	Notice that we added the Application Insights Nuget Package
+a.	Notice in Startup.cs ConfigureServices, this is where we add the kubernetes connection
+4. Create an Azure SQL DB and create two Databases, you can choose Basic Tier for your Databases
+	a. CatalogDB
+	b. IdentityDB
+5. In your visual Sudio Solution, navigate to the appsettings.json file. src\web\appsettings.json
+6. Replace lines 3 and 4 with the connection string values of your database server, username and password
+
+`` JSON
+ "CatalogConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=CatalogDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+    "IdentityConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=IdentityDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+``
+
 5.	Run the app locally show it connects to SQL and we can test locally
  
 6.	Show the AppInsights instance we have created in Azure Portal
