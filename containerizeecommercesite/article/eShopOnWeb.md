@@ -1,6 +1,32 @@
-## Insert Page Details
+## Modernize .NET Core Application, Build VSTS pipelines, Deploy to AKS Linux Cluster
 Cloud Modernization Dry Run Steps
  
+## Abstract ##
+
+## Learning Objectives ##
+After completing this excerisize you will be able to:
+
+- Containerize the eShoponWeb E-Commerce Application
+- Build and Push container images to Azure Container Registry
+- Create Build and Release Definitions in VSTS
+- Enable Continuous Integration and Delpoyment in VSTS
+- Reference creating a AKS Cluster in Azure
+- Deploy the solution using VSTS to AKS Cluster
+
+## Pre-Requisites ##
+In order to complete this POC you will need:
+
+- A **Microsoft Azure** subscription with (at least) contributor access.
+- Install latest version of **Visual Studio 2017 Enterprise** with following Workloads:
+	- .NET desktop development
+	- ASP.NET and web development
+	- Azure development
+	- Data storage and processing
+- Download latest **SQL Server Management Studio** [here](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms)
+- Download and install the latest **Docker Tools** from [here](https://docs.docker.com/docker-for-windows/install/)
+- Download the **eShopOnWeb Project** from [here](https://demowebst.blob.core.windows.net/sharecode/eShopOnWebNetCore2.0.zip)
+
+## Steps 
 1.	Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
 2.	Open eShop solution
 3.	Walk through a few pieces of code (pick a few random pieces)
