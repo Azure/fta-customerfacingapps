@@ -28,26 +28,26 @@ In order to complete this POC you will need:
 - Provison and deploy an AKS Cluster in Azure. [Here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal) is a refernce on creating AKS cluster in Azure
 
 ## Steps 
-1.	Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
-2.	Open eShop solution and walk through a few pieces of code
-3.	Notice that we added the Application Insights Nuget Package
-a.	Notice in Startup.cs ConfigureServices, this is where we add the kubernetes connection
-4. Create an Azure SQL DB and create two Databases, you can choose Basic Tier for your Databases
-	a. CatalogDB
-	b. IdentityDB
-5. In your visual Sudio Solution, navigate to the appsettings.json file. src\web\appsettings.json
-6. Replace lines 3 and 4 with the connection string values of your database server, username and password
+* Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
+* Open eShop solution and walk through a few pieces of code
+* Notice that we added the Application Insights Nuget Package
+* Notice in Startup.cs ConfigureServices, this is where we add the kubernetes connection
+* Create an Azure SQL DB and create two Databases, you can choose Basic Tier for your Databases
+  * CatalogDB
+  * IdentityDB
+* In Visual Sudio Solution, navigate to the appsettings.json file. src\web\appsettings.json
+* Replace lines 3 and 4 with the connection string values of your database server, username and password
 
-`` JSON
+```` JSON
  "CatalogConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=CatalogDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
     "IdentityConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=IdentityDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
-``
+````
 
-5.	Run the app locally show it connects to SQL and we can test locally
+* Run the application in Visual Studio locally. It will connect to Azure SQL and you can do some shopping on the site.
  
-6.	Show the AppInsights instance we have created in Azure Portal
-7.	Show the Azure Container Registry that we will be working with
-8.	Show the AKS cluster that we have configured
+* Show the AppInsights instance we have created in Azure Portal
+* Show the Azure Container Registry that we will be working with
+* Show the AKS cluster that we have configured
  
 (The reason why you would want to show steps 6-8 is because values relevant to these will be used in setting up configurations for the build and release definitions)
  
