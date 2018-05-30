@@ -100,16 +100,10 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
   
 * Click on phase and tasks link for Environment. Add two tasks to your Environment
 
-
-
-
-
-* For Replace Tokens - Search for Token  2) One for kubectl apply - Search for kube, you want the Deploy To Kubernetes Task, name it kubectl apply
-5.	For Replace tokens: Change display name: Replace tokens in **/*.yaml **/*.yml
-a.	Change Target Files: 
-**/*.yaml
-**/*.yml
-Your Replace token should look similar to below. 
+* For Replace Tokens - Search for Token
+  * For Replace tokens: Change display name: Replace tokens in `**/*.yaml **/*.yml`
+  * Change Target Files: `**/*.yaml and **/*.yml`
+* Your Replace token should look similar to below. 
 > **Note**: Under Token Prefix and Token Suffix, this is a **double underscore**.
 ![Screenshot](images/eShopOnWeb-ReplaceTokenTask.png)
  
@@ -124,6 +118,8 @@ Your Replace token should look similar to below.
   * For Azure Subscription Section, ensure you have your own subscription selected
   ![Screenshot](images/eShopOnWeb-NewKuberbnetesEndpoint.png)
 
+ > **Note**: This is where you set up connection to k8s cluster using the cluster config that you download by executing the get credentials command from Azure Portal. After running the get-credentials command, your **config** file is located: C:\Users\yourusername\.kube. Copy the contents of the config file to the KubeConfig field when setting up the new connection.
+
 * Continue to fill out the rest as shown below:
 ![Screenshot](images/eShopOnWeb-ReleaseBuildkubectlpart2.png)
 ![Screenshot](images/eShopOnWeb-ReleaseBuildkubectlpart3.png)
@@ -131,20 +127,15 @@ Your Replace token should look similar to below.
 * Add variables and their respective values
 ![Screenshot](images/eShopOnWeb-ReleaseBuildVariables.png)
 
-AppInsightsKey
-YourValue
+AppInsightsKey **YourValue**
  
-CatalogConnection
-YourValue
+CatalogConnection **YourValue**
  
-IdentityConnection
-YourValue
+IdentityConnection **YourValue**
  
-ImageNumber
-YourValue
+ImageNumber **YourValue**
  
-REPOSITORY
-YourValue
+REPOSITORY **YourValue**
 
 > **Note**: Each variable value here is what you used for your set up. ImageNumber will have the format referencing the build variable you used for your build definition. AppInsightsKey is your value for the instumentation key for Application Insights. Values you will use for CatalogConnection and IdentityConnection:
 ```` JSON
@@ -154,7 +145,7 @@ YourValue
 * Setup CD trigger
 ![Screenshot](images/eShopOnWeb-EnableContinuousIngReleaseDef.png)
 
-* **Deploy the Release build!**
+* Save all the changes and **Deploy the Release build!**
 
 * Navigate to the application deployed on the k8s cluster. Enter command similar to below on a command prompt. This command is avaible 
 from the k8s dashboard from the cluster overview blade in the Azure portal.
@@ -162,15 +153,14 @@ from the k8s dashboard from the cluster overview blade in the Azure portal.
  az aks browse --resource-group yourresourcegroupname --name yourk8sclustername
  ````
 * K8s Dashboard will launch. Note, this may take a few minutes to initialize the first time around.
+![Screenshot](images/eShopOnWeb-WebsiteExternalEndpointk8s.png)
 
-Kubernetes Dashboard loads. With a successful deploy you will be given an IP address to navigate to the site, 
-
-
-copy the IP:port and paste in the browser you site is now deployed and ready for use on k8s linux cluster
+ * With a successful deploy you will be given an IP address to navigate to the site.
+![Screenshot](images/eShopOnWeb-K8sdashboardpostdeploy.png)
 
 * Your website is Completely Modernized to the Cloud, running .NET Core E-Commerce Application, using VSTS, deployed to AKS Linux Cluster!!
+![Screenshot](images/eShopOnWeb-completelyModernizedDeployedToAKS.png)
 
-********************************************************************************************
 ##  Application Insights set up
 * Once the app is deployed click and add items to the basket, collect some telemetry. Telemetry Data will start flowing into the  Azure portal from k8s cluster!
 * Go to Application Insights and configure 2 chart metrics (server requests and server response time: group by cloud role instance). Go   to the Metrics Explorer
@@ -186,20 +176,7 @@ copy the IP:port and paste in the browser you site is now deployed and ready for
  
  ![Screenshot](images/eShopOnWeb-ApplicationInsightsMetricsExplorer.png)
  
-Click and add items to the basket and do some shopping. Telemetry Data will start flowing into the portal from k8s cluster!
-Endpoint: Fasialk8sConnection
-
-•	This is where you set up connection to k8s cluster using the cluster config that you download by executing the get credentials command ffrom Azure Portal.
-•	Click New for new connection
-•	After running the get-credentials command, Your config file is located: C:\Users\faisalm\.kube
-•	Copy the contents in the KubeConfig field when setting up the new connection
-
-
 ##  See the CI/CD Kick off a Build and Release
 * Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
 * Commit and push.
 * A build would be kicked-off/completed, the release will push the new build, and updated code is deplyed to the k8s cluster. This will take about 5 minutes.
-
-6.	Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
-7.	Commit and push.
-8.	Come back in about 5 minutes and it should be done.
