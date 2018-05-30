@@ -8,3 +8,4 @@ See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackFor
 ## Walkthroughs
 
 * [POC Scenario: Containerize a .NET Core E-commerce Website](article/contoso-finance.md)
+* [POC Scenario: Modernize .NET Core E-Commerce Site, Build VSTS pipelines, Deploy to AKS Linux Clusters](article/eShopOnWeb.md)
