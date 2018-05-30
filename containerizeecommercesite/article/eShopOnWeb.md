@@ -33,7 +33,8 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 ````
 
 ## Set up the Application Locally 
-* Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
+* Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch. Below is an example:
+![Screenshot](images/eShopOnWeb-CodeinVSTS.png)
 * Open eShop solution and walk through a few pieces of code
 * Notice that we added the Application Insights Nuget Package
 * Notice in Startup.cs ConfigureServices, this is where we add the kubernetes connection
@@ -63,14 +64,14 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * Your Completed build defintion with three tasks will look like this:
 ![Screenshot](images/eShopOnWeb-CompletedBuildDef.png)
 * Create a new build definition, select continue, Empty Process, ensure to use Hosted Linux Preview for Agent Queue
-* **Build Image**
+* **Build Image**. Search for Docker Task and add it.
 ![Screenshot](images/eShopOnWeb-NewBuildDef.png)
 ![Screenshot](images/eShopOnWeb-NewBuildProcess.png)
 
 ![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart1.png)
 ![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart2.png)
 
-* **Push an Image**
+* **Push an Image**. Search for another Docker Task and add it.
 ![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart1.png)
 ![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart2.png)
 
@@ -81,26 +82,55 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * Enable Continuous Integration under Triggers
 ![Screenshot](images/eShopOnWeb-EnableContinuousIngBuildDef.png)
  
-* Publish Artifact
+* Now search for Publish Artifact, and this task
 ![Screenshot](images/eShopOnWeb-PublishArtifactDef.png)
 
 * **Kick off a build and let it finish**
 
 
 ## Set up Release Definition in VSTS
-* Create a release definition and pipeline
-  * Setup release steps (token replace, kubectl apply)
-  * Use Empty Process
-  * 
-  * Point to the build definition you created
-  * Click on phase and tasks link for Environment
-4.	Add two tasks 1) One for Replace Tokens - Search for Token  2) One for kubectl apply - Search for kube, you want the Deploy To Kubernetes Task, name it kubectl apply
+* Create a release definition and pipeline. Once completed your definition will be similar to the one as below:
+![Screenshot](images/eShopOnWeb-CompleteReleaseDefPipeline.png)
+* Setup release steps (token replace, kubectl apply), use Empty Process
+![Screenshot](images/eShopOnWeb-CompleteReleaseDefPipeline.png)
+* Create a new artifact and point to the build definition you created
+![Screenshot](images/eShopOnWeb-eShopOnWeb-ReleaseDefTaskOne.png)
+* Then create a new environment. The Environment Name used here is **AKS Cluster**.
+  ![Screenshot](images/eShopOnWeb-AddTasksToEnvironment.png)
+  
+* Click on phase and tasks link for Environment. Add two tasks to your Environment
+
+
+
+
+
+* For Replace Tokens - Search for Token  2) One for kubectl apply - Search for kube, you want the Deploy To Kubernetes Task, name it kubectl apply
 5.	For Replace tokens: Change display name: Replace tokens in **/*.yaml **/*.yml
 a.	Change Target Files: 
 **/*.yaml
 **/*.yml
+Your Replace token should look similar to below. 
+> **Note**: Under Token Prefix and Token Suffix, this is a **double underscore**.
+![Screenshot](images/eShopOnWeb-ReplaceTokenTask.png)
  
-b.	Add variables and their respective values
+* **For kubectl apply** - Search for kube, you want the Deploy To Kubernetes Task, name it **kubectl apply**
+* Your kubectl task  will look similar to below, replacing filled in values with yours where applicable.
+![Screenshot](images/eShopOnWeb-ReleaseBuildkubectlpasrt1.png)
+
+* You will be creating a New Kubernetes Service Connection. Click on **New**
+  * Give this connection a Name
+* URL is the API server address from Azure portal, for the AKS Cluster, under Overview. **Append http://** in front. For example: http://apiserveraddressoftheclusterfromoverviewsection
+  * Copy all the contents of the **config** file under C:\Users\yourusername\.kube\ in the KubeConfig section.
+  * For Azure Subscription Section, ensure you have your own subscription selected
+  ![Screenshot](images/eShopOnWeb-NewKuberbnetesEndpoint.png)
+
+* Continue to fill out the rest as shown below:
+![Screenshot](images/eShopOnWeb-ReleaseBuildkubectlpart2.png)
+![Screenshot](images/eShopOnWeb-ReleaseBuildkubectlpart3.png)
+ 
+* Add variables and their respective values
+![Screenshot](images/eShopOnWeb-ReleaseBuildVariables.png)
+
 AppInsightsKey
 YourValue
  
@@ -115,42 +145,46 @@ YourValue
  
 REPOSITORY
 YourValue
- 
- 
-c.	Setup CD trigger
-d.	Deploy
- 
-3.	Hopefully this will work 
-4.	Once the app is deployed click around a bit, collect some telemetry
-5.	Go to app insights and configure 2 chart metrics (server requests and server response time: group by cloud role instance)
-6.	Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
-7.	Commit and push.
-8.	Come back in about 5 minutes and it should be done.
- 
- 
- 
+
+> **Note**: Each variable value here is what you used for your set up. ImageNumber will have the format referencing the build variable you used for your build definition. AppInsightsKey is your value for the instumentation key for Application Insights. Values you will use for CatalogConnection and IdentityConnection:
+```` JSON
+ "CatalogConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=CatalogDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+ "IdentityConnection": "Server=tcp:YOURDBSERVERNAME.database.windows.net,1433;Initial Catalog=IdentityDB;Persist Security Info=False;User ID=YOURUSERID;Password=YOURPASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+````
+* Setup CD trigger
+![Screenshot](images/eShopOnWeb-EnableContinuousIngReleaseDef.png)
+
+* **Deploy the Release build!**
+
+* Navigate to the application deployed on the k8s cluster. Enter command similar to below on a command prompt. This command is avaible 
+from the k8s dashboard from the cluster overview blade in the Azure portal.
+ ````
+ az aks browse --resource-group yourresourcegroupname --name yourk8sclustername
+ ````
+* K8s Dashboard will launch. Note, this may take a few minutes to initialize the first time around.
+
+Kubernetes Dashboard loads. With a successful deploy you will be given an IP address to navigate to the site, 
+
+
+copy the IP:port and paste in the browser you site is now deployed and ready for use on k8s linux cluster
+
+* Your website is Completely Modernized to the Cloud, running .NET Core E-Commerce Application, using VSTS, deployed to AKS Linux Cluster!!
+
 ********************************************************************************************
 ##  Application Insights set up
+* Once the app is deployed click and add items to the basket, collect some telemetry. Telemetry Data will start flowing into the  Azure portal from k8s cluster!
+* Go to Application Insights and configure 2 chart metrics (server requests and server response time: group by cloud role instance). Go   to the Metrics Explorer
+ * Graph One, Click on Edit. 
+   * Grouping on
+   * Group by: Cloud Role Instance
+   * Server, select Server Requests
  
-Once created, go to the Metrics Explorer
-I have two created.
-1.	demoAIfork8s - Instrumentation Key: efb0597c-3ffd-4e2f-9c41-82a94b41bb05
-2.	demoAIbuild2018fork8s - Instrumentation Key: 4aaa7d66-9dae-4901-b9f9-e57916b2b2f9
+ * Graph Two
+   * Grouping on
+   * Group by: Cloud Role Instance
+   * Server, select Server Response Time
  
-1.	Graph One, Click on Edit. 
-a.	Grouping on
-b.	Group by: Cloud Role Instance
-c.	Server, select Server Requests
- 
-2.	Graph Two
-a.	Grouping on
-b.	Group by: Cloud Role Instance
-c.	Server, select Server Response Time
- 
-3.	Display Three:
-a.	Chart Type, Grid
-b.	Cloud role instance
-c.	Usage: Check Sessions
+ ![Screenshot](images/eShopOnWeb-ApplicationInsightsMetricsExplorer.png)
  
 Click and add items to the basket and do some shopping. Telemetry Data will start flowing into the portal from k8s cluster!
 Endpoint: Fasialk8sConnection
@@ -165,3 +199,7 @@ Endpoint: Fasialk8sConnection
 * Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
 * Commit and push.
 * A build would be kicked-off/completed, the release will push the new build, and updated code is deplyed to the k8s cluster. This will take about 5 minutes.
+
+6.	Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
+7.	Commit and push.
+8.	Come back in about 5 minutes and it should be done.
