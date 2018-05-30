@@ -49,21 +49,24 @@ In order to complete this POC you will need:
 ![Screenshot](images/eShopOnWeb-RunAppLocally.png)
  
 * Create an AppInsights instance, to keep manageable, create it in the same Resource Group as the Managed AKS cluster. Note down the **Instrumentation Key**
+
 * Create an instance of Azure Container Registry in the Azure Portal. You may keep using the same Resource Group. [Here](https://docs.microsoft.com/en-us/azure/container-registry/) is more information on ACR
 * Your provisioned AKS cluster will look similar to the one below:
 
- 
-(The reason why you would want to show steps 6-8 is because values relevant to these will be used in setting up configurations for the build and release definitions)
+## Set up Build  Definition in VSTS
+* Go to VSTS, create a new build
+* To set up build steps, you will add two Docker tasks and one for Publish Artifact (docker build, docker push, publish k8s files)
+* Create a new build definition, select continue, Empty Process, ensure to use Hosted Linux Preview for Agent Queue
+![Screenshot](images/eShopOnWeb-RunAppLocally.png)
+* Ensure Use Default Build Context is unchecked and leave the resulting text field blank!!
+* Ensure You have your own Subscription selected and Authenticated with that subscription. Enter the rest of the fields as shown, leave rest as is. 
 
-## Set up Build and Release Definitions in VSTS 
-1.	Go to VSTS, create a new build
-a.	Setup build steps (docker build, docker push, publish k8s files)
-1.	Empty Process, ensure to use Hosted Linux Preview for Agent Queue
-2.	Ensure Use Default Build Context is unchecked and leave the resulting text field blank!!
-b.	Setup CI trigger
-c.	Kick off a build and let it finish
+
+* Setup CI trigger
+* Kick off a build and let it finish
  
- 
+
+## Set up Release Definition in VSTS
 2.	Create a release definition
 a.	Setup release steps (token replace, kubectl apply)
 1.	Use Empty Process
@@ -134,3 +137,9 @@ Endpoint: Fasialk8sConnection
 •	Click New for new connection
 •	After running the get-credentials command, Your config file is located: C:\Users\faisalm\.kube
 •	Copy the contents in the KubeConfig field when setting up the new connection
+
+
+##  See the CI/CD Kick off a Build and Release
+* Make a change in the code (e.g. change “Login” to “Sign in” or something visible)
+* Commit and push.
+* A build would be kicked-off/completed, the release will push the new build, and updated code is deplyed to the k8s cluster. This will take about 5 minutes.
