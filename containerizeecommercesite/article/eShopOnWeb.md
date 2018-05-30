@@ -57,14 +57,29 @@ In order to complete this POC you will need:
 * Go to VSTS, create a new build
 * To set up build steps, you will add two Docker tasks and one for Publish Artifact (docker build, docker push, publish k8s files)
 * Create a new build definition, select continue, Empty Process, ensure to use Hosted Linux Preview for Agent Queue
-![Screenshot](images/eShopOnWeb-RunAppLocally.png)
+![Screenshot](images/eShopOnWeb-NewBuildDef.png)
+![Screenshot](images/eShopOnWeb-NewBuildProcess.png)
+
+![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart1.png)
+![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart2.png)
+
+* Push an Image
+![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart1.png)
+![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart2.png)
+
+
 * Ensure Use Default Build Context is unchecked and leave the resulting text field blank!!
 * Ensure You have your own Subscription selected and Authenticated with that subscription. Enter the rest of the fields as shown, leave rest as is. 
 
 
-* Setup CI trigger
-* Kick off a build and let it finish
+* Enable Continuous Integration under Triggers
+
  
+* Publish Artifact
+
+
+* Kick off a build and let it finish
+
 
 ## Set up Release Definition in VSTS
 2.	Create a release definition
