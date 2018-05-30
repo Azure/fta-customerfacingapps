@@ -27,6 +27,10 @@ In order to complete this POC you will need:
 - Download and install the latest **Docker Tools** from [here](https://docs.docker.com/docker-for-windows/install/)
 - Download the **eShopOnWeb Project** from [here](https://demowebst.blob.core.windows.net/sharecode/eShopOnWebNetCore2.0.zip)
 - Provison and deploy an AKS Cluster in Azure. [Here](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough-portal) is a reference on creating AKS cluster in Azure
+- Run the following command to get the credentials on your machine. These are downloaded to a config file C:\Users\yourusername\.kube\config. You will need the contents of this config file in a later step
+```` CLI
+az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
+````
 
 ## Set up the Application Locally 
 * Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch
@@ -56,14 +60,17 @@ In order to complete this POC you will need:
 ## Set up Build  Definition in VSTS
 * Go to VSTS, create a new build
 * To set up build steps, you will add two Docker tasks and one for Publish Artifact (docker build, docker push, publish k8s files)
+* Your Completed build defintion with three tasks will look like this:
+![Screenshot](images/eShopOnWeb-CompletedBuildDef.png)
 * Create a new build definition, select continue, Empty Process, ensure to use Hosted Linux Preview for Agent Queue
+* **Build Image**
 ![Screenshot](images/eShopOnWeb-NewBuildDef.png)
 ![Screenshot](images/eShopOnWeb-NewBuildProcess.png)
 
 ![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart1.png)
 ![Screenshot](images/eShopOnWeb-BuildDefTaskOnePart2.png)
 
-* Push an Image
+* **Push an Image**
 ![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart1.png)
 ![Screenshot](images/eShopOnWeb-BuildDefTaskTwoPart2.png)
 
@@ -71,22 +78,22 @@ In order to complete this POC you will need:
 * Ensure Use Default Build Context is unchecked and leave the resulting text field blank!!
 * Ensure You have your own Subscription selected and Authenticated with that subscription. Enter the rest of the fields as shown, leave rest as is. 
 
-
 * Enable Continuous Integration under Triggers
-
+![Screenshot](images/eShopOnWeb-EnableContinuousIngBuildDef.png)
  
 * Publish Artifact
+![Screenshot](images/eShopOnWeb-PublishArtifactDef.png)
 
-
-* Kick off a build and let it finish
+* **Kick off a build and let it finish**
 
 
 ## Set up Release Definition in VSTS
-2.	Create a release definition
-a.	Setup release steps (token replace, kubectl apply)
-1.	Use Empty Process
-2.	Point to the build definition you created
-3.	Click on phase and tasks link for Environment
+* Create a release definition and pipeline
+  * Setup release steps (token replace, kubectl apply)
+  * Use Empty Process
+  * 
+  * Point to the build definition you created
+  * Click on phase and tasks link for Environment
 4.	Add two tasks 1) One for Replace Tokens - Search for Token  2) One for kubectl apply - Search for kube, you want the Deploy To Kubernetes Task, name it kubectl apply
 5.	For Replace tokens: Change display name: Replace tokens in **/*.yaml **/*.yml
 a.	Change Target Files: 
