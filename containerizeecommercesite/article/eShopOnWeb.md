@@ -94,7 +94,7 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * Setup release steps (token replace, kubectl apply), use Empty Process
 ![Screenshot](images/eShopOnWeb-CompleteReleaseDefPipeline.png)
 * Create a new artifact and point to the build definition you created
-![Screenshot](images/eShopOnWeb-eShopOnWeb-ReleaseDefTaskOne.png)
+![Screenshot](images/eShopOnWeb-ReleaseDefTaskOne.png)
 * Then create a new environment. The Environment Name used here is **AKS Cluster**.
   ![Screenshot](images/eShopOnWeb-AddTasksToEnvironment.png)
   
