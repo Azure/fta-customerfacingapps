@@ -72,7 +72,7 @@ To complete this scenario, you will need:
 * Choose an **Azure region** to host your deployment
   * You can choose any supported region, but for performance and cost reasons it's recommended to keep all resources in the same region whenever possible
   * You can see the availability of all [Azure services by region](https://azure.microsoft.com/en-us/regions/services/) to determine the best location
-  * For this scenario, choose a region where **Application Insights** (under the **Developer Tools** category in the link above) is available, as it is not currently present in all regions
+  * For this scenario, choose a region where **Application Insights** (under the **DevOps** category in the link above) is available, as it is not currently present in all regions
 * Whenever there could be multiple instances of the same type of resource in multiple regions (e.g. for a globally distributed web application that has an App Service in multiple regions), consider including an abbreviation of the region in the resource name
   * E.g. `eu` for East US or `we` for West Europe
   * We will refer to this as `<region>` in the suggested names below
