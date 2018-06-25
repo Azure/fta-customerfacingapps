@@ -1,5 +1,4 @@
 ## Modernize .NET Core Application, Build VSTS pipelines, Deploy to AKS Linux Cluster
-Cloud Modernization Dry Run Steps
  
 ## Abstract ##
 
