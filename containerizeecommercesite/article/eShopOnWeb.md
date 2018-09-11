@@ -12,6 +12,8 @@ After completing this excerisize you will be able to:
 - Reference creating a AKS Cluster in Azure
 - Deploy the solution using VSTS to AKS Cluster
 
+![Screenshot](images/eShopOnWeb-architecture.png)
+
 ## Pre-Requisites ##
 In order to complete this POC you will need:
 
