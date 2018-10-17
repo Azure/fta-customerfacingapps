@@ -2,7 +2,7 @@
 
 See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackForAzure) for more information.
 
-# Customer Facing Apps Scenarios
+# Cloud Native Apps Scenarios
 
 * [Digital Marketing](digital-marketing/)
 * [E-Commerce](ecommerce/)
