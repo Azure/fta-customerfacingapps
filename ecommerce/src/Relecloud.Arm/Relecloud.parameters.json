@@ -38,7 +38,7 @@
     "aadb2cEditProfilePolicyId": { "value": "B2C_1_EditProfile" },
 
     // Cognitive Services
-    "cognitiveServicesSkuName": { "value": "S1" },
+    "cognitiveServicesSkuName": { "value": "S" },
 
     // CDN
     "cdnSkuName": { "value": "standard_akamai" }

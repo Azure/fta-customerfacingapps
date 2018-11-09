@@ -334,7 +334,7 @@ App:Cdn:Url | The CDN Endpoint URL you copied before
 
 * Go back to your Resource Group in the Azure Portal and [create a new Text Analytics API](https://docs.microsoft.com/en-us/azure/cognitive-services/cognitive-services-apis-create-account)
   * _Suggested name for the Text Analytics API resource: `<prefix>-cognitiveservices`_
-  * For the **Pricing tier**, choose the `Free F0` if possible or the `Standard S0` otherwise
+  * For the **Pricing tier**, choose the `Free F0` if possible or the `Standard S` otherwise
   * ![Create Text Analytics API](media/cognitiveservices-create.png)
 * After the Text Analytics API has been created
   * Open the **Overview** blade and copy the **Endpoint** URL to Notepad
