@@ -1,4 +1,4 @@
-## Modernize .NET Core Application, Build VSTS pipelines, Deploy to AKS Linux Cluster
+## Modernize .NET Core Application, Build Azure DevOps pipelines, Deploy to AKS Linux Cluster
  
 ## Abstract ##
 
@@ -59,7 +59,7 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * Create an instance of Azure Container Registry in the Azure Portal. You may keep using the same Resource Group. [Here](https://docs.microsoft.com/en-us/azure/container-registry/) is more information on ACR
 * Your provisioned AKS cluster will look similar to the one below:
 
-## Set up Build  Definition in VSTS
+## Set up Build  Definition in Azure DevOps
 * Go to VSTS, create a new build
 * To set up build steps, you will add two Docker tasks and one for Publish Artifact (docker build, docker push, publish k8s files)
 * Your Completed build defintion with three tasks will look like this:
@@ -89,7 +89,7 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * **Kick off a build and let it finish**
 
 
-## Set up Release Definition in VSTS
+## Set up Release Definition in Azure DevOps
 * Create a release definition and pipeline. Once completed your definition will be similar to the one as below:
 ![Screenshot](images/eShopOnWeb-CompleteReleaseDefPipeline.png)
 * Setup release steps (token replace, kubectl apply), use Empty Process
