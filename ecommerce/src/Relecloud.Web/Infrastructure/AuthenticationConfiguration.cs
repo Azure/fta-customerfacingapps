@@ -1,4 +1,6 @@
-﻿namespace Relecloud.Web.Infrastructure
+﻿using System;
+
+namespace Relecloud.Web.Infrastructure
 {
     public class AuthenticationConfiguration
     {
@@ -15,7 +17,10 @@
         #region Derived Properties
 
         public string DefaultPolicy => SignUpSignInPolicyId;
-        public string Authority => $"https://login.microsoftonline.com/tfp/{Tenant}/{DefaultPolicy}/v2.0";
+        public string TenantName => Tenant.Replace(".onmicrosoft.com", string.Empty, StringComparison.OrdinalIgnoreCase); // The raw AAD B2C tenant name without the domain suffix.
+        public string Authority => $"https://{TenantName}.b2clogin.com/tfp/{Tenant}/{DefaultPolicy}/v2.0";
+        // The deprecated "login.microsoftonline.com" URL used the following Authority:
+        // public string Authority => $"https://login.microsoftonline.com/tfp/{Tenant}/{DefaultPolicy}/v2.0";
 
         #endregion
     }
