@@ -7,10 +7,10 @@ After completing this excerisize you will be able to:
 
 - Containerize the eShopOnWeb E-Commerce Application
 - Build and Push container images to Azure Container Registry
-- Create Build and Release Definitions in VSTS
-- Enable Continuous Integration and Delpoyment in VSTS
+- Create Build and Release Definitions in Azure DevOps
+- Enable Continuous Integration and Delpoyment in Azure DevOps
 - Reference creating a AKS Cluster in Azure
-- Deploy the solution using VSTS to AKS Cluster
+- Deploy the solution using Azure DevOps to AKS Cluster
 
 ![Screenshot](images/eShopOnWeb-architecture.png)
 
@@ -34,7 +34,7 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 ````
 
 ## Set up the Application Locally 
-* Check in the code for eWebShop in in VSTS. You can create a separate branch other than the main branch. Below is an example:
+* Check in the code for eWebShop in in Azure DevOps. You can create a separate branch other than the main branch. Below is an example:
 ![Screenshot](images/eShopOnWeb-CodeinVSTS.png)
 * Open eShop solution and walk through a few pieces of code
 * Notice that we added the Application Insights Nuget Package
@@ -60,7 +60,7 @@ az aks get-credentials --resource-group ft-akslinux-rg --name Fezk8sLinuxCluster
 * Your provisioned AKS cluster will look similar to the one below:
 
 ## Set up Build  Definition in Azure DevOps
-* Go to VSTS, create a new build
+* Go to Azure DevOps, create a new build
 * To set up build steps, you will add two Docker tasks and one for Publish Artifact (docker build, docker push, publish k8s files)
 * Your Completed build defintion with three tasks will look like this:
 ![Screenshot](images/eShopOnWeb-CompletedBuildDef.png)
@@ -159,7 +159,7 @@ from the k8s dashboard from the cluster overview blade in the Azure portal.
  * With a successful deploy you will be given an IP address to navigate to the site.
 ![Screenshot](images/eShopOnWeb-K8sdashboardpostdeploy.png)
 
-* Your website is Completely Modernized to the Cloud, running .NET Core E-Commerce Application, using VSTS, deployed to AKS Linux Cluster!!
+* Your website is Completely Modernized to the Cloud, running .NET Core E-Commerce Application, using Azure DevOps, deployed to AKS Linux Cluster!!
 ![Screenshot](images/eShopOnWeb-completelyModernizedDeployedToAKS.png)
 
 ##  Application Insights set up
