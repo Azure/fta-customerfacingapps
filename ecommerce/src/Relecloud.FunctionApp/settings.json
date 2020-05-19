@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "App:SqlDatabase:ConnectionString": "",
+    "App:StorageAccount:ConnectionString": "",
+    "App:StorageAccount:EventQueueName": "",
+    "App:CognitiveServices:EndpointUri": "",
+    "App:CognitiveServices.ApiKey": ""
+  }
+}

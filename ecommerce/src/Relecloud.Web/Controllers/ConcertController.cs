@@ -17,14 +17,15 @@ namespace Relecloud.Web.Controllers
         private readonly IConcertRepository concertRepository;
         private readonly IConcertSearchService concertSearchService;
         private readonly IEventSenderService eventSenderService;
-        private readonly TelemetryClient telemetryClient = new TelemetryClient();
+        private readonly TelemetryClient telemetryClient;
 
         #endregion
 
         #region Constructors
 
-        public ConcertController(IConcertRepository concertRepository, IConcertSearchService concertSearchService, IEventSenderService eventSenderService)
+        public ConcertController(TelemetryClient telemetryClient, IConcertRepository concertRepository, IConcertSearchService concertSearchService, IEventSenderService eventSenderService)
         {
+            this.telemetryClient = telemetryClient;
             this.concertRepository = concertRepository;
             this.concertSearchService = concertSearchService;
             this.eventSenderService = eventSenderService;
