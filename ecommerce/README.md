@@ -1,6 +1,6 @@
 # FastTrack for Azure
 
-See our [FastTrack for Azure landing page](https://github.com/Azure/FastTrackForAzure) for more information.
+See our [FastTrack for Azure landing page](https://azure.microsoft.com/programs/azure-fasttrack/partners) for more information.
 
 
 # E-commerce
