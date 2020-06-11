@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Services;
@@ -30,9 +31,15 @@ namespace Relecloud.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // The following line enables Application Insights telemetry collection.
+            services.AddApplicationInsightsTelemetry();
+            
             // Add framework services.
             services.AddMvc();
             services.AddRouting(options => options.LowercaseUrls = true);
+            services.AddMvc(option => option.EnableEndpointRouting = false);
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.Configure<MvcOptions>(options =>
             {
@@ -116,7 +123,7 @@ namespace Relecloud.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationInitializer applicationInitializer)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationInitializer applicationInitializer)
         {
             if (env.IsDevelopment())
             {

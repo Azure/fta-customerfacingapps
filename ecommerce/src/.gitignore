@@ -264,3 +264,6 @@ PublishProfiles/
 
 # Azure Functions localsettings file
 local.settings.json
+
+# Web App Settings file
+local.appsettings.json

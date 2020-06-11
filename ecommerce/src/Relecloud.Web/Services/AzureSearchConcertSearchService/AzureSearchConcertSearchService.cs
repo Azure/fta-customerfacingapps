@@ -49,7 +49,7 @@ namespace Relecloud.Web.Services.AzureSearchService
         private void InitializeConcertsIndex(SearchServiceClient serviceClient)
         {
             // Create the index that will contain the searchable data from the concerts.
-            var concertsIndex = new Index
+            var concertsIndex = new Microsoft.Azure.Search.Models.Index
             {
                 Name = IndexNameConcerts,
                 Fields = new[]

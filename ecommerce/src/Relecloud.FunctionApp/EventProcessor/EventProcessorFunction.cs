@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using System;
@@ -12,38 +13,61 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Azure.WebJobs.Hosting;
+using Microsoft.Azure.WebJobs.Host.Executors;
+using Microsoft.Extensions.Hosting;
 
 namespace Relecloud.FunctionApp.EventProcessor
 {
     public static class EventProcessorFunction
     {
+        private static IConfiguration Configuration;
+        static EventProcessorFunction()
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true )
+                .AddEnvironmentVariables() 
+                .Build();
+            Configuration = config;
+        }
+
         #region Run
 
         [FunctionName("EventProcessor")]
         public static async Task Run(
             [QueueTrigger("%App:StorageAccount:EventQueueName%", Connection = "App:StorageAccount:ConnectionString")]Event eventInfo,
             [Blob("tickets/ticket-{EntityId}.png", FileAccess.ReadWrite, Connection = "App:StorageAccount:ConnectionString")]CloudBlockBlob ticketImageBlob,
-            TraceWriter log)
+            ILogger log)
         {
-            log.Info($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\"");
 
-            if (string.Equals(eventInfo.EventType, "TicketCreated", StringComparison.OrdinalIgnoreCase))
+            log.LogInformation($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\"");
+
+            try
             {
-                var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
-                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString))
+                if (string.Equals(eventInfo.EventType, "TicketCreated", StringComparison.OrdinalIgnoreCase))
                 {
-                    await CreateTicketImageAsync(sqlDatabaseConnectionString, int.Parse(eventInfo.EntityId), ticketImageBlob, log);
+                    var sqlDatabaseConnectionString = Configuration.GetValue<string>("App:SqlDatabase:ConnectionString");
+                    if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString))
+                    {
+                        await CreateTicketImageAsync(sqlDatabaseConnectionString, int.Parse(eventInfo.EntityId), ticketImageBlob, log);
+                    }
+                }
+                else if (string.Equals(eventInfo.EventType, "ReviewCreated", StringComparison.OrdinalIgnoreCase))
+                {
+                    var sqlDatabaseConnectionString = Configuration.GetValue<string>("App:SqlDatabase:ConnectionString");
+                    var cognitiveServicesEndpointUri = Configuration.GetValue<string>("App:CognitiveServices:EndpointUri");
+                    var cognitiveServicesApiKey = Configuration.GetValue<string>("App:CognitiveServices:ApiKey");
+                    if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString) && !string.IsNullOrWhiteSpace(cognitiveServicesEndpointUri) && !string.IsNullOrWhiteSpace(cognitiveServicesApiKey))
+                    {
+                        await CalculateReviewSentimentScoreAsync(sqlDatabaseConnectionString, cognitiveServicesEndpointUri, cognitiveServicesApiKey, eventInfo.EntityId, log);
+                    }
                 }
             }
-            else if (string.Equals(eventInfo.EventType, "ReviewCreated", StringComparison.OrdinalIgnoreCase))
-            {
-                var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
-                var cognitiveServicesEndpointUri = ConfigurationManager.AppSettings["App:CognitiveServices:EndpointUri"];
-                var cognitiveServicesApiKey = ConfigurationManager.AppSettings["App:CognitiveServices:ApiKey"];
-                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString) && !string.IsNullOrWhiteSpace(cognitiveServicesEndpointUri) && !string.IsNullOrWhiteSpace(cognitiveServicesApiKey))
-                {
-                    await CalculateReviewSentimentScoreAsync(sqlDatabaseConnectionString, cognitiveServicesEndpointUri, cognitiveServicesApiKey, eventInfo.EntityId, log);
-                }
+            catch(Exception ex)
+            { 
+                log.LogError(ex, "Error processing element.");
+                throw;
             }
         }
 
@@ -51,7 +75,7 @@ namespace Relecloud.FunctionApp.EventProcessor
 
         #region Create Ticket Image
 
-        private static async Task CreateTicketImageAsync(string sqlDatabaseConnectionString, int ticketId, CloudBlockBlob ticketImageBlob, TraceWriter log)
+        private static async Task CreateTicketImageAsync(string sqlDatabaseConnectionString, int ticketId, CloudBlockBlob ticketImageBlob, ILogger log)
         {
             // Ensure the blob container is created.
             await ticketImageBlob.Container.CreateIfNotExistsAsync();
@@ -59,7 +83,7 @@ namespace Relecloud.FunctionApp.EventProcessor
             using (var connection = new SqlConnection(sqlDatabaseConnectionString))
             {
                 // Retrieve the ticket from the database.
-                log.Info($"Retrieving details for ticket \"{ticketId}\" from SQL Database...");
+                log.LogInformation($"Retrieving details for ticket \"{ticketId}\" from SQL Database...");
                 await connection.OpenAsync();
                 var getTicketCommand = connection.CreateCommand();
                 getTicketCommand.CommandText = "SELECT Concerts.Artist, Concerts.Location, Concerts.StartTime, Concerts.Price, Users.DisplayName FROM Tickets INNER JOIN Concerts ON Tickets.ConcertId = Concerts.Id INNER JOIN Users ON Tickets.UserId = Users.Id WHERE Tickets.Id = @id";
@@ -79,7 +103,6 @@ namespace Relecloud.FunctionApp.EventProcessor
                     using (var textFont = new Font("Arial", 12, FontStyle.Regular))
                     using (var bitmap = new Bitmap(640, 200, PixelFormat.Format24bppRgb))
                     using (var graphics = Graphics.FromImage(bitmap))
-                    using (var outputStream = ticketImageBlob.OpenWrite())
                     {
                         graphics.SmoothingMode = SmoothingMode.AntiAlias;
                         graphics.Clear(Color.White);
@@ -99,16 +122,14 @@ namespace Relecloud.FunctionApp.EventProcessor
                             offset += width + (2 * random.Next(1, 3));
                         }
 
-                        // Save to blob storage.
-                        log.Info("Uploading image to blob storage...");
-                        bitmap.Save(outputStream, ImageFormat.Png);
+                        await UploadBitmap(ticketImageBlob, log, bitmap, graphics);
                     }
                 }
 
                 // Update the ticket in the database with the image URL.
                 var policy = new SharedAccessBlobPolicy { Permissions = SharedAccessBlobPermissions.Read, SharedAccessExpiryTime = DateTimeOffset.MaxValue };
                 var imageUrl = ticketImageBlob.Uri.ToString() + ticketImageBlob.GetSharedAccessSignature(policy);
-                log.Info($"Updating ticket with image URL {imageUrl}...");
+                log.LogInformation($"Updating ticket with image URL {imageUrl}...");
                 var updateTicketCommand = connection.CreateCommand();
                 updateTicketCommand.CommandText = "UPDATE Tickets SET ImageUrl=@imageUrl WHERE Id=@id";
                 updateTicketCommand.Parameters.Add(new SqlParameter("id", ticketId));
@@ -117,35 +138,59 @@ namespace Relecloud.FunctionApp.EventProcessor
             }
         }
 
+        private static async Task UploadBitmap(CloudBlockBlob ticketImageBlob, ILogger log, Bitmap bitmap, Graphics graphics)
+        {
+            // Save to blob storage.
+            try
+            {
+                log.LogInformation("Uploading image to blob storage...");
+
+                graphics.Flush();
+                Stream s = new MemoryStream();
+                bitmap.Save(s, ImageFormat.Png);
+                s.Position = 0;
+                await ticketImageBlob.UploadFromStreamAsync(s);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Error saving bitmap");
+                throw;
+            }
+        }
+
         #endregion
 
         #region Calculate Review Sentiment Score
 
-        private static async Task CalculateReviewSentimentScoreAsync(string sqlDatabaseConnectionString, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey, string reviewId, TraceWriter log)
+        private static async Task CalculateReviewSentimentScoreAsync(string sqlDatabaseConnectionString, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey, string reviewId, ILogger log)
         {
             using (var connection = new SqlConnection(sqlDatabaseConnectionString))
             {
                 await connection.OpenAsync();
 
                 // Retrieve the review description.
-                log.Info($"Retrieving description for review \"{reviewId}\" from SQL Database...");
+                log.LogInformation($"Retrieving description for review \"{reviewId}\" from SQL Database...");
                 var getDescriptionCommand = connection.CreateCommand();
                 getDescriptionCommand.CommandText = "SELECT Description FROM Reviews WHERE Id=@id";
                 getDescriptionCommand.Parameters.Add(new SqlParameter("id", reviewId));
-                var reviewDescription = (string)await getDescriptionCommand.ExecuteScalarAsync();
+                var reviewResult = await getDescriptionCommand.ExecuteScalarAsync();
+                string reviewDescription = reviewResult?.ToString();
 
                 // Perform a sentiment analysis on the text.
-                // Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment.
-                log.Info($"Performing sentiment analysis on text: \"{reviewDescription}\"...");
-                var sentimentScore = await GetSentimentScoreAsync(reviewDescription, cognitiveServicesEndpointUri, cognitiveServicesApiKey);
+                if (!String.IsNullOrWhiteSpace(reviewDescription))
+                {
+                    // Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment.
+                    log.LogInformation($"Performing sentiment analysis on text: \"{reviewDescription}\"...");
+                    var sentimentScore = await GetSentimentScoreAsync(reviewDescription, cognitiveServicesEndpointUri, cognitiveServicesApiKey);
 
-                // Update the document with the sentiment value.
-                log.Info($"Updating review with sentiment score {sentimentScore}...");
-                var updateSentimentScoreCommand = connection.CreateCommand();
-                updateSentimentScoreCommand.CommandText = "UPDATE Reviews SET SentimentScore=@sentimentScore WHERE Id=@id";
-                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("id", reviewId));
-                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("sentimentScore", sentimentScore));
-                await updateSentimentScoreCommand.ExecuteNonQueryAsync();
+                    // Update the document with the sentiment value.
+                    log.LogInformation($"Updating review with sentiment score {sentimentScore}...");
+                    var updateSentimentScoreCommand = connection.CreateCommand();
+                    updateSentimentScoreCommand.CommandText = "UPDATE Reviews SET SentimentScore=@sentimentScore WHERE Id=@id";
+                    updateSentimentScoreCommand.Parameters.Add(new SqlParameter("id", reviewId));
+                    updateSentimentScoreCommand.Parameters.Add(new SqlParameter("sentimentScore", sentimentScore));
+                    await updateSentimentScoreCommand.ExecuteNonQueryAsync();
+                }
             }
         }
 
