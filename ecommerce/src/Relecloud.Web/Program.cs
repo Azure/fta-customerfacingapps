@@ -1,19 +1,14 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Relecloud.Web;
 
-namespace Relecloud.Web
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            BuildWebHost(args).Run();
-        }
+var builder = WebApplication.CreateBuilder(args);
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseApplicationInsights()
-                .UseStartup<Startup>()
-                .Build();
-    }
-}
+var startup = new Startup(builder.Configuration);
+
+// Add services to the container.
+startup.ConfigureServices(builder.Services);
+
+var app = builder.Build();
+
+startup.Configure(app);
+
+app.Run();

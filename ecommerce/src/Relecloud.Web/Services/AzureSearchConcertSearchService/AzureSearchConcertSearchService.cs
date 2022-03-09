@@ -1,10 +1,8 @@
 ﻿using Microsoft.Azure.Search;
 using Microsoft.Azure.Search.Models;
 using Relecloud.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
+using Index = Microsoft.Azure.Search.Models.Index;
 
 namespace Relecloud.Web.Services.AzureSearchService
 {

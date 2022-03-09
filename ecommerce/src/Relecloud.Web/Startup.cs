@@ -1,20 +1,16 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using Relecloud.Web.Infrastructure;
+using Relecloud.Web.Models;
 using Relecloud.Web.Services;
 using Relecloud.Web.Services.AzureSearchService;
 using Relecloud.Web.Services.DummyServices;
 using Relecloud.Web.Services.SqlDatabaseEventRepository;
 using Relecloud.Web.Services.StorageAccountEventSenderService;
-using System;
+using System.Security.Claims;
 
 namespace Relecloud.Web
 {
@@ -47,7 +43,7 @@ namespace Relecloud.Web
             var azureSearchAdminKey = Configuration.GetValue<string>("App:AzureSearch:AdminKey");
             var storageAccountConnectionString = Configuration.GetValue<string>("App:StorageAccount:ConnectionString");
             var storageAccountEventQueueName = Configuration.GetValue<string>("App:StorageAccount:EventQueueName");
-            var authenticationConfigurationSection = Configuration.GetSection("App:Authentication");
+            var applicationInsightsConnectionString = Configuration.GetValue<string>("App:ApplicationInsights:ConnectionString");
             var cdnUrlString = Configuration.GetValue<string>("App:Cdn:Url");
             var cdnUrl = default(Uri);
             if (Uri.TryCreate(cdnUrlString, UriKind.Absolute, out cdnUrl))
@@ -97,13 +93,18 @@ namespace Relecloud.Web
             }
 
             // Add authentication if configured.
-            if (!string.IsNullOrWhiteSpace(authenticationConfigurationSection.GetValue<string>("ClientId")))
+            if (!string.IsNullOrWhiteSpace(Configuration.GetValue<string>("AzureAdB2C:ClientId")))
             {
-                services.Configure<AuthenticationConfiguration>(authenticationConfigurationSection);
-                services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie(options => options.LoginPath = new PathString("/account/signin"))
-                    .AddOpenIdConnect(/* The options are more complex and are therefore configured separately using IConfigureOptions for clarity */);
-                services.AddSingleton<IConfigureOptions<OpenIdConnectOptions>, OpenIdConnectOptionsSetup>();
+                AddAzureAdB2cServices(services);
+            }
+
+            if (string.IsNullOrWhiteSpace(applicationInsightsConnectionString))
+            {
+                throw new ArgumentNullException(nameof(applicationInsightsConnectionString));
+            }
+            else
+            {
+                services.AddApplicationInsightsTelemetry(applicationInsightsConnectionString);
             }
 
             // The ApplicationInitializer is injected in the Configure method with all its dependencies and will ensure
@@ -115,10 +116,81 @@ namespace Relecloud.Web
             services.AddSession();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ApplicationInitializer applicationInitializer)
+        private void AddAzureAdB2cServices(IServiceCollection services)
         {
-            if (env.IsDevelopment())
+            services.AddRazorPages().AddMicrosoftIdentityUI();
+            services.AddMicrosoftIdentityWebAppAuthentication(Configuration, Constants.AzureAdB2C);
+
+            services.Configure<OpenIdConnectOptions>(Configuration.GetSection("AzureAdB2C"));
+            services.Configure((Action<MicrosoftIdentityOptions>)(options =>
+            {
+                options.Events = new OpenIdConnectEvents
+                {
+                    OnTokenValidated = async ctx =>
+                    {
+                        TransformRoleClaims(ctx);
+                        await CreateOrUpdateUserInformation(ctx);
+                    }
+                };
+            }));
+        }
+
+        private static async Task CreateOrUpdateUserInformation(TokenValidatedContext ctx)
+        {
+            try
+            {
+                if (ctx.Principal?.Identity is not null)
+                {
+                    // The user has signed in, ensure the information in the database is up-to-date.
+                    var user = new User
+                    {
+                        Id = ctx.Principal.GetUniqueId(),
+                        DisplayName = ctx.Principal.Identity.Name ?? "New User"
+                    };
+
+                    var repository = ctx.HttpContext.RequestServices.GetRequiredService<IConcertRepository>();
+                    await repository.CreateOrUpdateUserAsync(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                logger.LogError(ex, "Unhandled exception from Startup.TransformRoleClaims");
+            }
+        }
+
+        private static void TransformRoleClaims(TokenValidatedContext ctx)
+        {
+            try
+            {
+                const string RoleClaim = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+                if (ctx.Principal?.Identity is not null)
+                {
+                    // Find all claims of the requested claim type, split their values by spaces
+                    // and then take the ones that aren't yet on the principal individually.
+                    var claims = ctx.Principal.FindAll("extension_AppRoles")
+                    .SelectMany(c => c.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+                    .Where(s => !ctx.Principal.HasClaim(RoleClaim, s)).ToList();
+
+                    // Add all new claims to the principal's identity.
+                    ((ClaimsIdentity)ctx.Principal.Identity).AddClaims(claims.Select(s => new Claim(RoleClaim, s)));
+                }
+            }
+            catch (Exception ex)
+            {
+                var logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Startup>>();
+                logger.LogError(ex, "Unhandled exception from Startup.TransformRoleClaims");
+            }
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(WebApplication app)
+        {
+            using var serviceScope = app.Services.CreateScope();
+            serviceScope.ServiceProvider.GetService<ApplicationInitializer>();
+
+
+            if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
@@ -130,15 +202,19 @@ namespace Relecloud.Web
 
             app.UseStaticFiles();
 
+            app.UseRouting();
+
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseSession();
 
-            app.UseMvc(routes =>
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
+                endpoints.MapControllerRoute(
                     name: "default",
-                    template: "{controller=home}/{action=index}/{id?}");
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapRazorPages();
             });
         }
     }
