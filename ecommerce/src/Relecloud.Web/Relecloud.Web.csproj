@@ -9,9 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.5.0" />
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.1.3" />
@@ -30,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\favicon.ico" />
+    <None Include="wwwroot\robots.txt" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
