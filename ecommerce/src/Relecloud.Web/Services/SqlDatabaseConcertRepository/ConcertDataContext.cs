@@ -27,9 +27,7 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             try
             {
                 var databaseName = this.Database.GetDbConnection().Database;
-                // Note: the cast to string is to work around an issue in Entity Framework Core 2.0 with string interpolation.
-                // See https://github.com/aspnet/EntityFrameworkCore/issues/9734.
-                this.Database.ExecuteSqlRaw((string)$"ALTER DATABASE [{databaseName}] SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)");
+                this.Database.ExecuteSqlRaw($"ALTER DATABASE [{databaseName}] SET CHANGE_TRACKING = ON (CHANGE_RETENTION = 2 DAYS, AUTO_CLEANUP = ON)");
             }
             catch (Microsoft.Data.SqlClient.SqlException exc)
             {
@@ -41,9 +39,7 @@ namespace Relecloud.Web.Services.SqlDatabaseEventRepository
             try
             {
                 var concertsTableName = nameof(Concerts);
-                // Note: the cast to string is to work around an issue in Entity Framework Core 2.0 with string interpolation.
-                // See https://github.com/aspnet/EntityFrameworkCore/issues/9734.
-                this.Database.ExecuteSqlRaw((string)$"ALTER TABLE [{concertsTableName}] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = ON)");
+                this.Database.ExecuteSqlRaw($"ALTER TABLE [{concertsTableName}] ENABLE CHANGE_TRACKING WITH (TRACK_COLUMNS_UPDATED = ON)");
             }
             catch (Microsoft.Data.SqlClient.SqlException exc)
             {
