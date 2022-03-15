@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
 using Relecloud.Web.Services;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Relecloud.Web.Controllers
 {
@@ -16,16 +13,17 @@ namespace Relecloud.Web.Controllers
 
         private readonly IConcertRepository concertRepository;
         private readonly IEventSenderService eventSenderService;
-        private readonly TelemetryClient telemetryClient = new TelemetryClient();
+        private readonly TelemetryClient telemetryClient;
 
         #endregion
 
         #region Constructors
 
-        public CartController(IConcertRepository concertRepository, IEventSenderService eventSenderService)
+        public CartController(IConcertRepository concertRepository, IEventSenderService eventSenderService, TelemetryClient telemetryClient)
         {
             this.concertRepository = concertRepository;
             this.eventSenderService = eventSenderService;
+            this.telemetryClient = telemetryClient;
         }
 
         #endregion
