@@ -193,7 +193,6 @@ namespace Relecloud.Web
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
             }
             else
             {
