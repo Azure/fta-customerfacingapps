@@ -100,7 +100,7 @@ namespace Relecloud.Web
 
             if (string.IsNullOrWhiteSpace(applicationInsightsConnectionString))
             {
-                throw new ArgumentNullException(nameof(applicationInsightsConnectionString));
+                services.AddApplicationInsightsTelemetry();
             }
             else
             {
