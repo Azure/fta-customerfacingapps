@@ -192,7 +192,7 @@ namespace Relecloud.Web.Services.AzureSearchService
             var options = new AutocompleteOptions()
             {
                 Mode = AutocompleteMode.OneTermWithContext,
-                Size = 6
+                Size = 10
             };
 
             // Convert the autocompleteResult results to a list that can be displayed in the client.
