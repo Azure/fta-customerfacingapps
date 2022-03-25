@@ -1,10 +1,10 @@
-﻿using Microsoft.Azure.Search;
-using Microsoft.Azure.Search.Models;
+﻿using Azure;
+using Azure.Search.Documents;
+using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Indexes.Models;
+using Azure.Search.Documents.Models;
+using Relecloud.Web.Infrastructure;
 using Relecloud.Web.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Relecloud.Web.Services.AzureSearchService
 {
@@ -19,10 +19,10 @@ namespace Relecloud.Web.Services.AzureSearchService
 
         #region Fields
 
-        private readonly string searchServiceName;
-        private readonly SearchCredentials searchServiceCredentials;
+        private readonly Uri searchServiceUri;
+        private readonly AzureKeyCredential azureKeyCredential;
         private readonly string concertsSqlDatabaseConnectionString;
-        private readonly SearchIndexClient concertsIndexClient;
+        private readonly SearchClient concertsIndexClient;
 
         #endregion
 
@@ -30,10 +30,10 @@ namespace Relecloud.Web.Services.AzureSearchService
 
         public AzureSearchConcertSearchService(string searchServiceName, string adminKey, string concertsSqlDatabaseConnectionString)
         {
-            this.searchServiceName = searchServiceName;
-            this.searchServiceCredentials = new SearchCredentials(adminKey);
+            this.searchServiceUri = new Uri($"https://{searchServiceName}.search.windows.net");
             this.concertsSqlDatabaseConnectionString = concertsSqlDatabaseConnectionString;
-            this.concertsIndexClient = new SearchIndexClient(this.searchServiceName, IndexNameConcerts, this.searchServiceCredentials);
+            this.azureKeyCredential = new AzureKeyCredential(adminKey);
+            this.concertsIndexClient = new SearchClient(this.searchServiceUri, IndexNameConcerts, this.azureKeyCredential);
         }
 
         #endregion
@@ -42,66 +42,96 @@ namespace Relecloud.Web.Services.AzureSearchService
 
         public void Initialize()
         {
-            var serviceClient = new SearchServiceClient(this.searchServiceName, this.searchServiceCredentials);
+            var serviceClient = new SearchIndexClient(this.searchServiceUri, this.azureKeyCredential);
             InitializeConcertsIndex(serviceClient);
         }
 
-        private void InitializeConcertsIndex(SearchServiceClient serviceClient)
+        private void InitializeConcertsIndex(SearchIndexClient serviceClient)
         {
             // Create the index that will contain the searchable data from the concerts.
-            var concertsIndex = new Index
+            var concertsIndex = new SearchIndex(IndexNameConcerts)
             {
-                Name = IndexNameConcerts,
                 Fields = new[]
                 {
-                    new Field(nameof(Concert.Id), DataType.String) { IsKey = true, IsSearchable = false },
-                    new Field(nameof(Concert.Artist), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
-                    new Field(nameof(Concert.Genre), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true, IsFilterable = true, IsFacetable = true },
-                    new Field(nameof(Concert.Location), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true, IsFilterable = true, IsFacetable = true },
-                    new Field(nameof(Concert.Title), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
-                    new Field(nameof(Concert.Description), DataType.String, AnalyzerName.EnMicrosoft) { IsSearchable = true, IsRetrievable = true },
-                    new Field(nameof(Concert.Price), DataType.Double) { IsSearchable = false, IsFilterable = true, IsFacetable = true, IsSortable = true, IsRetrievable = true },
-                    new Field(nameof(Concert.StartTime), DataType.DateTimeOffset) { IsSearchable = false, IsRetrievable = true, IsSortable = true, IsFilterable = true },
-                },
-                Suggesters = new[]
-                {
-                    new Suggester("default-suggester", nameof(Concert.Artist), nameof(Concert.Location), nameof(Concert.Title))
+                    new SearchField(nameof(Concert.Id), SearchFieldDataType.String)
+                    {
+                        IsKey = true,
+                        IsSearchable = false
+                    },
+                    new SearchField(nameof(Concert.Artist), SearchFieldDataType.String)
+                    {
+                        AnalyzerName = LexicalAnalyzerName.EnMicrosoft,
+                        IsSearchable = true,
+                    },
+                    new SearchField(nameof(Concert.Genre), SearchFieldDataType.String)
+                    {
+                        AnalyzerName = LexicalAnalyzerName.EnMicrosoft,
+                        IsSearchable = true,
+                        IsFilterable = true,
+                        IsFacetable = true
+                    },
+                    new SearchField(nameof(Concert.Location), SearchFieldDataType.String)
+                    {
+                        AnalyzerName = LexicalAnalyzerName.EnMicrosoft,
+                        IsSearchable = true,
+                        IsFilterable = true,
+                        IsFacetable = true
+                    },
+                    new SearchField(nameof(Concert.Title), SearchFieldDataType.String) {
+                        AnalyzerName = LexicalAnalyzerName.EnMicrosoft,
+                        IsSearchable = true,
+                    },
+                    new SearchField(nameof(Concert.Description), SearchFieldDataType.String) {
+                        AnalyzerName = LexicalAnalyzerName.EnMicrosoft,
+                        IsSearchable = true,
+                    },
+                    new SearchField(nameof(Concert.Price), SearchFieldDataType.Double)
+                    {
+                        IsSearchable = false,
+                        IsFilterable = true,
+                        IsFacetable = true,
+                        IsSortable = true,
+                    },
+                    new SearchField(nameof(Concert.StartTime), SearchFieldDataType.DateTimeOffset)
+                    {
+                        IsSearchable = false,
+                        IsSortable = true,
+                        IsFilterable = true
+                    },
                 },
                 DefaultScoringProfile = "default-scoring",
-                ScoringProfiles = new[]
-                {
-                    new ScoringProfile("default-scoring")
-                    {
-                        // Add a lot of weight to the artist and above average weight to the title.
-                        TextWeights = new TextWeights(new Dictionary<string, double> {
-                            { nameof(Concert.Artist), 2.0 },
-                            { nameof(Concert.Title), 1.5 }
-                        })
-                    }
-                }
             };
-            serviceClient.Indexes.CreateOrUpdate(concertsIndex);
+
+            var suggester = new SearchSuggester("default-suggester", new[] { nameof(Concert.Artist), nameof(Concert.Location), nameof(Concert.Title) });
+            concertsIndex.Suggesters.Add(suggester);
+            concertsIndex.ScoringProfiles.Add(new ScoringProfile("default-scoring")
+            {
+                // Add a lot of weight to the artist and above average weight to the title.
+                TextWeights = new TextWeights(new Dictionary<string, double> {
+                    { nameof(Concert.Artist), 2.0 },
+                    { nameof(Concert.Title), 1.5 }
+                })
+            });
+
+            serviceClient.CreateOrUpdateIndex(concertsIndex);
+
+            var searchIndexerClient = new SearchIndexerClient(this.searchServiceUri, this.azureKeyCredential);
 
             // Create the data source that connects to the SQL Database account containing the consult requests.
-            var concertsDataSource = new DataSource
+            var concertsDataSource = new SearchIndexerDataSourceConnection(IndexNameConcerts, SearchIndexerDataSourceType.AzureSql, this.concertsSqlDatabaseConnectionString, new SearchIndexerDataContainer("Concerts"))
             {
-                Name = IndexNameConcerts,
-                Type = DataSourceType.AzureSql,
-                Container = new DataContainer("Concerts"),
-                Credentials = new DataSourceCredentials(this.concertsSqlDatabaseConnectionString),
                 DataChangeDetectionPolicy = new SqlIntegratedChangeTrackingPolicy()
             };
-            serviceClient.DataSources.CreateOrUpdate(concertsDataSource);
+
+            searchIndexerClient.CreateOrUpdateDataSourceConnection(concertsDataSource);
 
             // Create the indexer that will pull the data from the database into the search index.
-            var concertsIndexer = new Indexer
+            var concertsIndexer = new SearchIndexer(name: IndexNameConcerts, dataSourceName: IndexNameConcerts, targetIndexName: IndexNameConcerts)
             {
-                Name = IndexNameConcerts,
-                DataSourceName = IndexNameConcerts,
-                TargetIndexName = IndexNameConcerts,
                 Schedule = new IndexingSchedule(TimeSpan.FromMinutes(5))
             };
-            serviceClient.Indexers.CreateOrUpdate(concertsIndexer);
+
+            searchIndexerClient.CreateOrUpdateIndexer(concertsIndexer);
         }
 
         #endregion
@@ -118,48 +148,34 @@ namespace Relecloud.Web.Services.AzureSearchService
             var items = new List<ConcertSearchResult>();
 
             // Search concerts.
-            var concertQueryParameters = new SearchParameters
+            var concertQueryParameters = new SearchOptions();
+
+
+            concertQueryParameters.HighlightFields.Add(nameof(Concert.Description));
+            concertQueryParameters.OrderBy.AddRange(GetOrderBy(request));
+            concertQueryParameters.Facets.AddRange(new[] { $"{nameof(Concert.Price)},interval:{PriceFacetInterval}", nameof(Concert.Genre), nameof(Concert.Location) });
+            concertQueryParameters.Filter = GetFilter(request);
+
+            var concertResults = await this.concertsIndexClient.SearchAsync<ConcertSearchResult>(query, concertQueryParameters);
+
+            foreach (var concertResult in concertResults.Value.GetResults())
             {
-                // Highlight the search text in the description
-                HighlightFields = new[] { nameof(Concert.Description) },
-
-                // Sort on the requested field.
-                OrderBy = GetOrderBy(request),
-
-                // Filter on the requested fields.
-                Filter = GetFilter(request),
-
-                // Request facet information.
-                Facets = new[] { $"{nameof(Concert.Price)},interval:{PriceFacetInterval}", nameof(Concert.Genre), nameof(Concert.Location) }
-            };
-            var concertResults = await this.concertsIndexClient.Documents.SearchAsync(query, concertQueryParameters);
-            foreach (var concertResult in concertResults.Results)
-            {
-                items.Add(new ConcertSearchResult
-                {
-                    Score = concertResult.Score,
-                    HitHighlights = concertResult.Highlights == null ? new string[0] : concertResult.Highlights.SelectMany(h => h.Value).ToArray(),
-                    Id = int.Parse((string)concertResult.Document[nameof(Concert.Id)]),
-                    Artist = (string)concertResult.Document[nameof(Concert.Artist)],
-                    Genre = (string)concertResult.Document[nameof(Concert.Genre)],
-                    Location = (string)concertResult.Document[nameof(Concert.Location)],
-                    Title = (string)concertResult.Document[nameof(Concert.Title)],
-                    Description = (string)concertResult.Document[nameof(Concert.Description)],
-                    Price = (double)concertResult.Document[nameof(Concert.Price)],
-                    StartTime = (DateTimeOffset)concertResult.Document[nameof(Concert.StartTime)]
-                });
+                concertResult.Document.HitHighlights = concertResult.Highlights.SelectMany(h => h.Value).ToArray();
+                items.Add(concertResult.Document);
             }
 
             // Process the search facets.
             var facets = new List<SearchFacet>();
-            foreach (var facetResultsForField in concertResults.Facets)
+            foreach (var facetResultsForField in concertResults.Value.Facets)
             {
                 var fieldName = facetResultsForField.Key;
                 var facetValues = facetResultsForField.Value.Select(f => GetFacetValue(fieldName, f)).ToArray();
                 facets.Add(new SearchFacet(fieldName, fieldName, facetValues));
             }
 
-            return new SearchResponse<ConcertSearchResult>(request, items, facets);
+            var searchResponse = new SearchResponse<ConcertSearchResult>(request, items, facets);
+
+            return searchResponse;
         }
 
         #endregion
@@ -172,12 +188,17 @@ namespace Relecloud.Web.Services.AzureSearchService
             {
                 return new string[0];
             }
-            var parameters = new SuggestParameters
+
+            var options = new AutocompleteOptions()
             {
-                Top = 10
+                Mode = AutocompleteMode.OneTermWithContext,
+                Size = 10
             };
-            var results = await this.concertsIndexClient.Documents.SuggestAsync(query, "default-suggester", parameters);
-            return results.Results.Select(s => s.Text).Distinct().ToArray();
+
+            // Convert the autocompleteResult results to a list that can be displayed in the client.
+            var autocompleteResult = await this.concertsIndexClient.AutocompleteAsync(query, "default-suggester", options).ConfigureAwait(false);
+
+            return autocompleteResult.Value.Results.Select(x => x.Text).ToList();
         }
 
         #endregion

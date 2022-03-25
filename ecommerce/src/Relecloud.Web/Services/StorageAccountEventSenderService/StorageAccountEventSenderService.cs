@@ -1,20 +1,20 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Newtonsoft.Json;
+﻿using Azure.Storage.Queues;
 using Relecloud.Web.Models;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Relecloud.Web.Services.StorageAccountEventSenderService
 {
     public class StorageAccountEventSenderService : IEventSenderService
     {
-        private readonly CloudQueue queue;
+        private readonly QueueClient queue;
 
         public StorageAccountEventSenderService(string connectionString, string queueName)
         {
-            var account = CloudStorageAccount.Parse(connectionString);
-            var queueClient = account.CreateCloudQueueClient();
-            this.queue = queueClient.GetQueueReference(queueName);
+            this.queue = new QueueClient(connectionString, queueName, new QueueClientOptions
+            {
+                MessageEncoding = QueueMessageEncoding.Base64
+            });
         }
 
         public void Initialize()
@@ -24,9 +24,16 @@ namespace Relecloud.Web.Services.StorageAccountEventSenderService
 
         public async Task SendEventAsync(Event eventMessage)
         {
-            var body = JsonConvert.SerializeObject(eventMessage);
-            var message = new CloudQueueMessage(body);
-            await this.queue.AddMessageAsync(message);
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                }
+            };
+            var body = JsonSerializer.Serialize(eventMessage, options);
+            await this.queue.SendMessageAsync(body);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Relecloud.Web.Models
+﻿namespace Relecloud.Web.Models
 {
     public class Concert
     {

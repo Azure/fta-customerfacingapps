@@ -29,17 +29,16 @@
                     <li><a asp-controller="Ticket" asp-action="Index">Tickets</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    @if (User.Identity.IsAuthenticated)
+                    @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <li><a asp-area="" asp-controller="Account" asp-action="EditProfile">Hello @User.Identity.Name!</a></li>
-                        <li><a asp-area="" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
+                        <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="EditProfile">Hello @User.Identity.Name!</a></li>
+                        <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignOut">Sign out</a></li>
                     }
                     else
                     {
-                        <li><a asp-area="" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
+                        <li><a asp-area="MicrosoftIdentity" asp-controller="Account" asp-action="SignIn">Sign in</a></li>
                     }
-                </ul>
-                <form class="navbar-form navbar-left" asp-controller="Concert" asp-action="Search" method="get">
+           <form class="navbar-form navbar-left" asp-controller="Concert" asp-action="Search" method="get">
                     <div class="form-group">
                         <input type="text" id="query" name="query" class="form-control" placeholder="Search concerts">
                     </div>
