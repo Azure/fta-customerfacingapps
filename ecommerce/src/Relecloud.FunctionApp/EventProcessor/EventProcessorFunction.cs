@@ -1,168 +1,212 @@
-﻿using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Newtonsoft.Json;
-using System;
-using System.Configuration;
-using System.Data.SqlClient;
+using Azure;
+using Azure.AI.TextAnalytics;
+using Azure.Storage.Blobs;
+using Azure.Storage.Sas;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Relecloud.FunctionApp.EventProcessor
 {
-    public static class EventProcessorFunction
+    public class EventProcessorFunction
     {
-        #region Run
+        private readonly ILogger _logger;
+        private readonly IConfiguration _configuration;
 
-        [FunctionName("EventProcessor")]
-        public static async Task Run(
-            [QueueTrigger("%App:StorageAccount:EventQueueName%", Connection = "App:StorageAccount:ConnectionString")]Event eventInfo,
-            [Blob("tickets/ticket-{EntityId}.png", FileAccess.ReadWrite, Connection = "App:StorageAccount:ConnectionString")]CloudBlockBlob ticketImageBlob,
-            TraceWriter log)
+        public EventProcessorFunction(ILoggerFactory loggerFactory, IConfiguration configuration)
         {
-            log.Info($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\"");
+            _logger = loggerFactory.CreateLogger<EventProcessorFunction>();
+            _configuration = configuration;
+        }
 
-            if (string.Equals(eventInfo.EventType, "TicketCreated", StringComparison.OrdinalIgnoreCase))
+        [Function("EventProcessor")]
+        public async Task Run(
+            [QueueTrigger("relecloudconcertevents", Connection = "App:StorageAccount:ConnectionString")]
+            Event eventInfo)
+        {
+            _logger.LogInformation($"Received event type \"{eventInfo.EventType}\" for entity \"{eventInfo.EntityId}\"");
+
+            try
             {
-                var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
-                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString))
+                if ("TicketCreated".Equals(eventInfo.EventType, StringComparison.OrdinalIgnoreCase))
                 {
-                    await CreateTicketImageAsync(sqlDatabaseConnectionString, int.Parse(eventInfo.EntityId), ticketImageBlob, log);
+                    var sqlDatabaseConnectionString = _configuration.GetValue<string>("App:SqlDatabase:ConnectionString");
+                    if (int.TryParse(eventInfo.EntityId, out var ticketId)
+                        && !string.IsNullOrWhiteSpace(sqlDatabaseConnectionString))
+                    {
+                        await CreateTicketImageAsync(ticketId);
+                    }
+                }
+                else if ("ReviewCreated".Equals(eventInfo.EventType, StringComparison.OrdinalIgnoreCase))
+                {
+                    var sqlDatabaseConnectionString = _configuration.GetValue<string>("App:SqlDatabase:ConnectionString");
+                    var cognitiveServicesEndpointUri = _configuration.GetValue<string>("App:CognitiveServices:EndpointUri");
+                    var cognitiveServicesApiKey = _configuration.GetValue<string>("App:CognitiveServices:ApiKey");
+                    if (int.TryParse(eventInfo.EntityId, out var reviewId)
+                        && !string.IsNullOrWhiteSpace(sqlDatabaseConnectionString)
+                        && !string.IsNullOrWhiteSpace(cognitiveServicesEndpointUri)
+                        && !string.IsNullOrWhiteSpace(cognitiveServicesApiKey))
+                    {
+                        await CalculateReviewSentimentScoreAsync(sqlDatabaseConnectionString, cognitiveServicesEndpointUri, cognitiveServicesApiKey, reviewId);
+                    }
                 }
             }
-            else if (string.Equals(eventInfo.EventType, "ReviewCreated", StringComparison.OrdinalIgnoreCase))
+            catch (Exception ex)
             {
-                var sqlDatabaseConnectionString = ConfigurationManager.AppSettings["App:SqlDatabase:ConnectionString"];
-                var cognitiveServicesEndpointUri = ConfigurationManager.AppSettings["App:CognitiveServices:EndpointUri"];
-                var cognitiveServicesApiKey = ConfigurationManager.AppSettings["App:CognitiveServices:ApiKey"];
-                if (!string.IsNullOrWhiteSpace(sqlDatabaseConnectionString) && !string.IsNullOrWhiteSpace(cognitiveServicesEndpointUri) && !string.IsNullOrWhiteSpace(cognitiveServicesApiKey))
-                {
-                    await CalculateReviewSentimentScoreAsync(sqlDatabaseConnectionString, cognitiveServicesEndpointUri, cognitiveServicesApiKey, eventInfo.EntityId, log);
-                }
+                _logger.LogError(ex, "Unable to process the TicketCreated event");
+                throw;
             }
         }
 
-        #endregion
-
         #region Create Ticket Image
 
-        private static async Task CreateTicketImageAsync(string sqlDatabaseConnectionString, int ticketId, CloudBlockBlob ticketImageBlob, TraceWriter log)
+        private async Task CreateTicketImageAsync(int ticketId)
         {
-            // Ensure the blob container is created.
-            await ticketImageBlob.Container.CreateIfNotExistsAsync();
-
-            using (var connection = new SqlConnection(sqlDatabaseConnectionString))
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // Retrieve the ticket from the database.
-                log.Info($"Retrieving details for ticket \"{ticketId}\" from SQL Database...");
-                await connection.OpenAsync();
-                var getTicketCommand = connection.CreateCommand();
-                getTicketCommand.CommandText = "SELECT Concerts.Artist, Concerts.Location, Concerts.StartTime, Concerts.Price, Users.DisplayName FROM Tickets INNER JOIN Concerts ON Tickets.ConcertId = Concerts.Id INNER JOIN Users ON Tickets.UserId = Users.Id WHERE Tickets.Id = @id";
-                getTicketCommand.Parameters.Add(new SqlParameter("id", ticketId));
-                using (var ticketDataReader = await getTicketCommand.ExecuteReaderAsync())
+                throw new PlatformNotSupportedException("Ticket rendering must run on Windows environment");
+            }
+
+            var ticketImageBlob = new MemoryStream();
+            using var connection = new SqlConnection("App:SqlDatabase:ConnectionString");
+
+            // Retrieve the ticket from the database.
+            _logger.LogInformation($"Retrieving details for ticket \"{ticketId}\" from SQL Database...");
+            await connection.OpenAsync();
+            var getTicketCommand = connection.CreateCommand();
+            getTicketCommand.CommandText = "SELECT Concerts.Artist, Concerts.Location, Concerts.StartTime, Concerts.Price, Users.DisplayName FROM Tickets INNER JOIN Concerts ON Tickets.ConcertId = Concerts.Id INNER JOIN Users ON Tickets.UserId = Users.Id WHERE Tickets.Id = @id";
+            getTicketCommand.Parameters.Add(new SqlParameter("id", ticketId));
+            using (var ticketDataReader = await getTicketCommand.ExecuteReaderAsync())
+            {
+                // Get ticket details.
+                var hasRows = await ticketDataReader.ReadAsync();
+                if (hasRows == false)
                 {
-                    // Get ticket details.
-                    await ticketDataReader.ReadAsync();
-                    var artist = ticketDataReader.GetString(0);
-                    var location = ticketDataReader.GetString(1);
-                    var startTime = ticketDataReader.GetDateTimeOffset(2);
-                    var price = ticketDataReader.GetDouble(3);
-                    var userName = ticketDataReader.GetString(4);
-
-                    // Generate the ticket image.
-                    using (var headerFont = new Font("Arial", 18, FontStyle.Bold))
-                    using (var textFont = new Font("Arial", 12, FontStyle.Regular))
-                    using (var bitmap = new Bitmap(640, 200, PixelFormat.Format24bppRgb))
-                    using (var graphics = Graphics.FromImage(bitmap))
-                    using (var outputStream = ticketImageBlob.OpenWrite())
-                    {
-                        graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                        graphics.Clear(Color.White);
-
-                        // Print concert details.
-                        graphics.DrawString(artist, headerFont, Brushes.DarkSlateBlue, new PointF(10, 10));
-                        graphics.DrawString($"{location}   |   {startTime.UtcDateTime.ToString()}", textFont, Brushes.Gray, new PointF(10, 40));
-                        graphics.DrawString($"{userName}   |   {price.ToString("c")}", textFont, Brushes.Gray, new PointF(10, 60));
-
-                        // Print a fake barcode.
-                        var random = new Random();
-                        var offset = 15;
-                        while (offset < 620)
-                        {
-                            var width = 2 * random.Next(1, 3);
-                            graphics.FillRectangle(Brushes.Black, offset, 90, width, 90);
-                            offset += width + (2 * random.Next(1, 3));
-                        }
-
-                        // Save to blob storage.
-                        log.Info("Uploading image to blob storage...");
-                        bitmap.Save(outputStream, ImageFormat.Png);
-                    }
+                    _logger.LogWarning($"No Ticket found for id:{ticketId}");
+                    return; //this ticket was not found
                 }
 
-                // Update the ticket in the database with the image URL.
-                var policy = new SharedAccessBlobPolicy { Permissions = SharedAccessBlobPermissions.Read, SharedAccessExpiryTime = DateTimeOffset.MaxValue };
-                var imageUrl = ticketImageBlob.Uri.ToString() + ticketImageBlob.GetSharedAccessSignature(policy);
-                log.Info($"Updating ticket with image URL {imageUrl}...");
-                var updateTicketCommand = connection.CreateCommand();
-                updateTicketCommand.CommandText = "UPDATE Tickets SET ImageUrl=@imageUrl WHERE Id=@id";
-                updateTicketCommand.Parameters.Add(new SqlParameter("id", ticketId));
-                updateTicketCommand.Parameters.Add(new SqlParameter("imageUrl", imageUrl));
-                await updateTicketCommand.ExecuteNonQueryAsync();
+                var artist = ticketDataReader.GetString(0);
+                var location = ticketDataReader.GetString(1);
+                var startTime = ticketDataReader.GetDateTimeOffset(2);
+                var price = ticketDataReader.GetDouble(3);
+                var userName = ticketDataReader.GetString(4);
+
+                // Generate the ticket image.
+                using (var headerFont = new Font("Arial", 18, FontStyle.Bold))
+                using (var textFont = new Font("Arial", 12, FontStyle.Regular))
+                using (var bitmap = new Bitmap(640, 200, PixelFormat.Format24bppRgb))
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    graphics.Clear(Color.White);
+
+                    // Print concert details.
+                    graphics.DrawString(artist, headerFont, Brushes.DarkSlateBlue, new PointF(10, 10));
+                    graphics.DrawString($"{location}   |   {startTime.UtcDateTime}", textFont, Brushes.Gray, new PointF(10, 40));
+                    graphics.DrawString($"{userName}   |   {price.ToString("c")}", textFont, Brushes.Gray, new PointF(10, 60));
+
+                    // Print a fake barcode.
+                    var random = new Random();
+                    var offset = 15;
+                    while (offset < 620)
+                    {
+                        var width = 2 * random.Next(1, 3);
+                        graphics.FillRectangle(Brushes.Black, offset, 90, width, 90);
+                        offset += width + (2 * random.Next(1, 3));
+                    }
+
+                    // Save to blob storage.
+                    _logger.LogInformation("Uploading image to blob storage...");
+                    bitmap.Save(ticketImageBlob, ImageFormat.Png);
+                }
             }
+            ticketImageBlob.Position = 0;
+            _logger.LogInformation("Successfully wrote to database.");
+
+            var storageAccountConnStr = _configuration.GetValue<string>("App:StorageAccount:ConnectionString");
+            var blobServiceClient = new BlobServiceClient(storageAccountConnStr);
+
+            //  Gets a reference to the container.
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient("tickets");
+
+            //  Gets a reference to the blob in the container
+            var blobClient = blobContainerClient.GetBlobClient($"tickets/ticket-{ticketId}.png");
+            var blobInfo = await blobClient.UploadAsync(ticketImageBlob, overwrite: true);
+
+            _logger.LogInformation("Successfully wrote blob to storage.");
+
+            // Update the ticket in the database with the image URL.
+            // Creates a client to the BlobService using the connection string.
+
+            //  Defines the resource being accessed and for how long the access is allowed.
+            var blobSasBuilder = new BlobSasBuilder
+            {
+                StartsOn = DateTime.UtcNow.AddMinutes(-5),
+                ExpiresOn = DateTime.UtcNow.Add(TimeSpan.FromDays(30)),
+            };
+
+            //  Defines the type of permission.
+            blobSasBuilder.SetPermissions(BlobSasPermissions.Read);
+
+            //  Builds the Sas URI.
+            var queryUri = blobClient.GenerateSasUri(blobSasBuilder);
+
+            _logger.LogInformation($"Updating ticket with image URL {queryUri}...");
+            var updateTicketCommand = connection.CreateCommand();
+            updateTicketCommand.CommandText = "UPDATE Tickets SET ImageUrl=@imageUrl WHERE Id=@id";
+            updateTicketCommand.Parameters.Add(new SqlParameter("id", ticketId));
+            updateTicketCommand.Parameters.Add(new SqlParameter("imageUrl", queryUri.ToString()));
+            await updateTicketCommand.ExecuteNonQueryAsync();
+
+            _logger.LogInformation("Successfully updated database with SAS.");
         }
 
         #endregion
 
         #region Calculate Review Sentiment Score
 
-        private static async Task CalculateReviewSentimentScoreAsync(string sqlDatabaseConnectionString, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey, string reviewId, TraceWriter log)
+        private async Task CalculateReviewSentimentScoreAsync(string sqlDatabaseConnectionString, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey, int reviewId)
         {
-            using (var connection = new SqlConnection(sqlDatabaseConnectionString))
+            using var connection = new SqlConnection(sqlDatabaseConnectionString);
+            await connection.OpenAsync();
+
+            // Retrieve the review description.
+            _logger.LogInformation($"Retrieving description for review \"{reviewId}\" from SQL Database...");
+            var getDescriptionCommand = connection.CreateCommand();
+            getDescriptionCommand.CommandText = "SELECT Description FROM Reviews WHERE Id=@id";
+            getDescriptionCommand.Parameters.Add(new SqlParameter("id", reviewId));
+            var reviewDescription = (string?)await getDescriptionCommand.ExecuteScalarAsync();
+            if (reviewDescription is null)
             {
-                await connection.OpenAsync();
-
-                // Retrieve the review description.
-                log.Info($"Retrieving description for review \"{reviewId}\" from SQL Database...");
-                var getDescriptionCommand = connection.CreateCommand();
-                getDescriptionCommand.CommandText = "SELECT Description FROM Reviews WHERE Id=@id";
-                getDescriptionCommand.Parameters.Add(new SqlParameter("id", reviewId));
-                var reviewDescription = (string)await getDescriptionCommand.ExecuteScalarAsync();
-
-                // Perform a sentiment analysis on the text.
-                // Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment.
-                log.Info($"Performing sentiment analysis on text: \"{reviewDescription}\"...");
-                var sentimentScore = await GetSentimentScoreAsync(reviewDescription, cognitiveServicesEndpointUri, cognitiveServicesApiKey);
-
-                // Update the document with the sentiment value.
-                log.Info($"Updating review with sentiment score {sentimentScore}...");
-                var updateSentimentScoreCommand = connection.CreateCommand();
-                updateSentimentScoreCommand.CommandText = "UPDATE Reviews SET SentimentScore=@sentimentScore WHERE Id=@id";
-                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("id", reviewId));
-                updateSentimentScoreCommand.Parameters.Add(new SqlParameter("sentimentScore", sentimentScore));
-                await updateSentimentScoreCommand.ExecuteNonQueryAsync();
+                return; //there is no comment to analyze
             }
+
+            // Perform a sentiment analysis on the text.
+            // Scores close to 1 indicate positive sentiment, while scores close to 0 indicate negative sentiment.
+            _logger.LogInformation($"Performing sentiment analysis on text: \"{reviewDescription}\"...");
+            var sentimentScore = await GetSentimentScoreAsync(reviewDescription, cognitiveServicesEndpointUri, cognitiveServicesApiKey);
+
+            // Update the document with the sentiment value.
+            _logger.LogInformation($"Updating review with sentiment score {sentimentScore}...");
+            var updateSentimentScoreCommand = connection.CreateCommand();
+            updateSentimentScoreCommand.CommandText = "UPDATE Reviews SET SentimentScore=@sentimentScore WHERE Id=@id";
+            updateSentimentScoreCommand.Parameters.Add(new SqlParameter("id", reviewId));
+            updateSentimentScoreCommand.Parameters.Add(new SqlParameter("sentimentScore", sentimentScore));
+            await updateSentimentScoreCommand.ExecuteNonQueryAsync();
         }
 
-        private static async Task<float> GetSentimentScoreAsync(string text, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey)
+        private async Task<float> GetSentimentScoreAsync(string text, string cognitiveServicesEndpointUri, string cognitiveServicesApiKey)
         {
-            using (var client = new HttpClient())
-            {
-                var sentimentApiUrl = cognitiveServicesEndpointUri + "/sentiment";
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", cognitiveServicesApiKey);
-                var request = new { documents = new[] { new { language = "en", id = "001", text = text } } };
-                var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(sentimentApiUrl, content);
-                response.EnsureSuccessStatusCode();
-                var responseBody = await response.Content.ReadAsStringAsync();
-                var dynamicResponse = (dynamic)JsonConvert.DeserializeObject(responseBody);
-                return (float)dynamicResponse.documents[0].score;
-            }
+            var credentials = new AzureKeyCredential(cognitiveServicesApiKey);
+            var client = new TextAnalyticsClient(new Uri(cognitiveServicesEndpointUri), credentials);
+            var reviews = await client.AnalyzeSentimentAsync(text);
+            return (float)reviews.Value.ConfidenceScores.Positive;
         }
 
         #endregion
