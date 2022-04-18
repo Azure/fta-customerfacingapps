@@ -127,7 +127,7 @@ namespace Relecloud.FunctionApp.EventProcessor
                 }
             }
             ticketImageBlob.Position = 0;
-            _logger.LogInformation("Successfully wrote to database.");
+            _logger.LogInformation("Successfully generated image.");
 
             var storageAccountConnStr = _configuration.GetValue<string>("App:StorageAccount:ConnectionString");
             var blobServiceClient = new BlobServiceClient(storageAccountConnStr);
