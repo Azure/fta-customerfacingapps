@@ -136,7 +136,7 @@ namespace Relecloud.FunctionApp.EventProcessor
             var blobContainerClient = blobServiceClient.GetBlobContainerClient("tickets");
 
             //  Gets a reference to the blob in the container
-            var blobClient = blobContainerClient.GetBlobClient($"tickets/ticket-{ticketId}.png");
+            var blobClient = blobContainerClient.GetBlobClient($"ticket-{ticketId}.png");
             var blobInfo = await blobClient.UploadAsync(ticketImageBlob, overwrite: true);
 
             _logger.LogInformation("Successfully wrote blob to storage.");
