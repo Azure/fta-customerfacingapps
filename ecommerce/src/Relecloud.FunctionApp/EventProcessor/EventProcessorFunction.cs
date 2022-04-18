@@ -73,7 +73,7 @@ namespace Relecloud.FunctionApp.EventProcessor
             }
 
             var ticketImageBlob = new MemoryStream();
-            using var connection = new SqlConnection("App:SqlDatabase:ConnectionString");
+            using var connection = new SqlConnection(_configuration.GetValue<string>("App:SqlDatabase:ConnectionString"));
 
             // Retrieve the ticket from the database.
             _logger.LogInformation($"Retrieving details for ticket \"{ticketId}\" from SQL Database...");
