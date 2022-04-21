@@ -1,5 +1,7 @@
 ﻿# POC Scenario: E-commerce Website
 
+> **IMPORTANT:** The walkthrough below is based on .NET Core 2.0 which is no longer supported. The code in the main branch has been updated for newer versions and certain functional changes have been made as well which may make the steps below no longer match the code in the main branch. To follow along with the exact code that was used to document the walkthrough below, please refer to the [.NET Core 2.0 branch](https://github.com/Azure/fta-customerfacingapps/tree/netcore2.0).
+
 ## Table Of Contents
 
 * [Introduction](#introduction)
