@@ -46,8 +46,8 @@ During this guided Proof-Of-Concept (POC) scenario, you will learn about bringin
 
 #### Prerequisites
 To complete this scenario, you will need:
-* Visual Studio 2017 Update 3 or later with the "Azure development" features
-* [ASP.NET Core 2.0](https://www.microsoft.com/net/core)
+* Visual Studio 2019 with the "Azure development" features
+* [ASP.NET Core 3.1](https://www.microsoft.com/net/core)
 * An Azure subscription
 
 #### Plan your deployment
