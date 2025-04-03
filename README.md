@@ -1,3 +1,7 @@
+# IMPORTANT
+
+This repo is being archived and will not longer be maintained due to the disbanding of the FastTrack for Azure program.
+
 # FastTrack for Azure
 
 See our [FastTrack for Azure landing page](https://azure.microsoft.com/programs/azure-fasttrack/partners) for more information.
